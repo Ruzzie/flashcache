@@ -183,3 +183,5 @@ UpgradeLog*.htm
 FakesAssemblies/
 *.DotSettings
 
+src/Ruzzie.Caching/Ruzzie.Caching/nuget.exe
+src/Ruzzie.Caching/Ruzzie.Caching/project.lock.json
