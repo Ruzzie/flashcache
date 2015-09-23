@@ -34,7 +34,7 @@
         "System.Collections": "4.0.10",
         "System.Collections.Specialized": "4.0.0",
         "System.Collections.Concurrent": "4.0.10",
-      
+        "System.Runtime": "4.0.21-*",
         "System.Runtime.Extensions": "4.0.10",
         "System.Reflection": "4.0.10",
         "System.Threading": "4.0.10",
