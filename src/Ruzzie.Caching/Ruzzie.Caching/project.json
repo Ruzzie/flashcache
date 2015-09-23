@@ -30,15 +30,8 @@
   
     "dotnet": {
       "dependencies": {
-        "Microsoft.CSharp": "4.0.0",
-        "System.Collections": "4.0.10",
-        "System.Collections.Specialized": "4.0.0",
-        "System.Collections.Concurrent": "4.0.10",
-        "System.Runtime": "4.0.21-*",
-        "System.Runtime.Extensions": "4.0.10",
-        "System.Reflection": "4.0.10",
-        "System.Threading": "4.0.10",
-        "System.Reflection.Emit.Lightweight": "4.0.0",
+        "Microsoft.NETCore" : "5.0.1-beta-23225",
+        "System.Reflection.Emit.Lightweight": "4.0.1-beta-*",
         "Microsoft.Framework.Caching.Memory": "1.0.0-*"
 
       },
