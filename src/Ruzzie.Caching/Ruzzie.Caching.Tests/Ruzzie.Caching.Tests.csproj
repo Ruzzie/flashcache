@@ -62,9 +62,6 @@
       <HintPath>..\packages\NUnit.2.6.4\lib\nunit.framework.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Ruzzie.Caching">
-      <HintPath>..\artifacts\bin\Ruzzie.Caching\Release\dotnet\Ruzzie.Caching.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -84,6 +81,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Ruzzie.Caching.Net46\Ruzzie.Caching.Net46.csproj">
+      <Project>{f111f8d0-09c1-45ed-8bab-a28d7c3be350}</Project>
+      <Name>Ruzzie.Caching.Net46</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

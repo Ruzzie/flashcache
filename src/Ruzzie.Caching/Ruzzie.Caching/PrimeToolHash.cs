@@ -1,4 +1,4 @@
-﻿namespace Ruzzie.Cacing.Tests
+﻿namespace Ruzzie.Caching
 {
     //http://www.dotnetperls.com/prime
     internal static class PrimeToolHash
