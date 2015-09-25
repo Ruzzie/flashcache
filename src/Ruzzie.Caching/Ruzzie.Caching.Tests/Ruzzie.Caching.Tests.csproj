@@ -73,7 +73,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="FlashCacheTests.cs" />
-    <Compile Include="MemoryCacheWithSizeLimitTests.cs" />
     <Compile Include="MultiThreadedCacheTests.cs" />
     <Compile Include="PowerOfTwoHelperTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -83,9 +82,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Ruzzie.Caching.Net46\Ruzzie.Caching.Net46.csproj">
-      <Project>{f111f8d0-09c1-45ed-8bab-a28d7c3be350}</Project>
-      <Name>Ruzzie.Caching.Net46</Name>
+    <ProjectReference Include="..\Ruzzie.Caching.NET46\Ruzzie.Caching.NET46.csproj">
+      <Project>{43ad5c18-c3f9-44c9-a4d8-0dc3fc97c225}</Project>
+      <Name>Ruzzie.Caching.NET46</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

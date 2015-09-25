@@ -33,8 +33,7 @@ namespace Ruzzie.Caching
             }
 
             long twoGbInBytes = (2048L*1024L*1024L);
-            
-            int entryTypeSize = TypeHelper.SizeOf(new FlashEntry(-1,default(TKey),default(TValue))) + (averageSizeInBytesOfKey > 0 ? averageSizeInBytesOfKey : 0) + (averageSizeInBytesOfValue > 0 ? averageSizeInBytesOfValue : 0);            
+            int entryTypeSize = TypeHelper.SizeOf(typeof (FlashEntry)) + (averageSizeInBytesOfKey > 0 ? averageSizeInBytesOfKey : 0) + (averageSizeInBytesOfValue > 0 ? averageSizeInBytesOfValue : 0);
             long probableMaxArrayLength = twoGbInBytes/(entryTypeSize + 2);
 
             long desiredArrayLength = (maximumSizeInMb*(1024L)*(1024L))/entryTypeSize;

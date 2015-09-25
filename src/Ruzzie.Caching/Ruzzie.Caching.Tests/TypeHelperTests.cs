@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using NUnit.Framework;
 
 namespace Ruzzie.Caching.Tests
@@ -12,7 +11,7 @@ namespace Ruzzie.Caching.Tests
         {
             int sizeInBytes = TypeHelper.SizeOf(typeof (KeyValuePair<string, float>));
             
-            Assert.That(sizeInBytes,Is.EqualTo(16));
+            Assert.That(sizeInBytes,Is.EqualTo(8));
         }
 
         [Test]

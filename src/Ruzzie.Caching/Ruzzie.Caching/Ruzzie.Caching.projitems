@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>1364395d-7c9f-4ed7-9ff2-043b24eea384</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>Ruzzie.Caching</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)FlashCache.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IMemoryCacheWithLimit.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PowerOfTwoHelper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PrimeTool.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PrimeToolHash.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TypeHelper.cs" />
+  </ItemGroup>
+</Project>
