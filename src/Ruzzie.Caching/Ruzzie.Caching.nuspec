@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>Ruzzie.Cache.FlashCache</id>
+    <version>$version$</version>
+    <title>FlashCache</title>
+    <authors>Dorus Verhoeckx</authors>
+    <owners>Dorus Verhoeckx</owners>
+    <projectUrl>https://github.com/Ruzzie/flashcache</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>a fixed size high performant in memory cache</description>
+    <!--<releaseNotes>Summary of changes made in this release of the package.</releaseNotes>-->
+    <copyright>Copyright 2015</copyright>
+    <tags>Caching, Memory, Fixed size memory</tags>
+  </metadata>
+   <files>
+		<file src="..\..\LICENSE.md" />
+		<file src="..\..\README.md" />
+        <file src="Ruzzie.Caching.NET46\bin\Release\" target="lib\net46\" />
+        <file src="Ruzzie.Caching.NET45\bin\Release\" target="lib\net45\" />
+        <!--file src="lib\portable-net4+wp8+win8\" target="lib\portable-net4+wp8+win8\" /-->
+    </files>
+</package>

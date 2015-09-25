@@ -9,6 +9,8 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Ruzzie.Caching", "Ruzzie.Ca
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ruzzie.Caching.NET46", "Ruzzie.Caching.NET46\Ruzzie.Caching.NET46.csproj", "{43AD5C18-C3F9-44C9-A4D8-0DC3FC97C225}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ruzzie.Caching.NET45", "Ruzzie.Caching.NET45\Ruzzie.Caching.NET45.csproj", "{839EDF2F-DD6C-4B54-81C9-24E4200AEAAF}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		Ruzzie.Caching\Ruzzie.Caching.projitems*{43ad5c18-c3f9-44c9-a4d8-0dc3fc97c225}*SharedItemsImports = 4
@@ -27,6 +29,10 @@ Global
 		{43AD5C18-C3F9-44C9-A4D8-0DC3FC97C225}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{43AD5C18-C3F9-44C9-A4D8-0DC3FC97C225}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{43AD5C18-C3F9-44C9-A4D8-0DC3FC97C225}.Release|Any CPU.Build.0 = Release|Any CPU
+		{839EDF2F-DD6C-4B54-81C9-24E4200AEAAF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{839EDF2F-DD6C-4B54-81C9-24E4200AEAAF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{839EDF2F-DD6C-4B54-81C9-24E4200AEAAF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{839EDF2F-DD6C-4B54-81C9-24E4200AEAAF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
