@@ -39,6 +39,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="FlashCacheTests.cs" />
+    <Compile Include="MemoryCacheWithSizeLimitTests.cs" />
     <Compile Include="MultiThreadedCacheTests.cs" />
     <Compile Include="PowerOfTwoHelperTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

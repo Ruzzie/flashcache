@@ -7,6 +7,7 @@
     <authors>Dorus Verhoeckx</authors>
     <owners>Dorus Verhoeckx</owners>
     <projectUrl>https://github.com/Ruzzie/flashcache</projectUrl>
+	<licenseUrl>https://github.com/Ruzzie/flashcache/blob/master/LICENSE.md</licenseUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>a fixed size high performant in memory cache</description>
     <!--<releaseNotes>Summary of changes made in this release of the package.</releaseNotes>-->

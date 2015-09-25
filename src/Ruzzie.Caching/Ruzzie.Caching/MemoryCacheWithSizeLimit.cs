@@ -1,11 +1,6 @@
 ﻿using System;
-//using System.CodeDom;
 using System.Collections.Specialized;
-#if DNXCORE50
-using Microsoft.Framework.Caching.Memory;
-#else
 using System.Runtime.Caching;
-#endif
 
 namespace Ruzzie.Caching
 {
@@ -13,7 +8,7 @@ namespace Ruzzie.Caching
     /// A fixed size cache that uses <see cref="MemoryCache"/> as a backing cache.
     /// </summary>
     /// <typeparam name="TValue"></typeparam>
-    public class MemoryCacheWithSizeLimit<TValue> : IMemoryCacheWithLimit<string, TValue>, IDisposable
+    public class MemoryCacheWithSizeLimit<TValue> : IMemoryCacheWithLimit<string,TValue>, IDisposable
     {
         private MemoryCache _cache;
 
@@ -31,34 +26,18 @@ namespace Ruzzie.Caching
             }
 
             string cacheName = GetType().FullName;
-#if DNXCORE50
-           _cache = new MemoryCache(new MemoryCacheOptions()
-            {
-                CompactOnMemoryPressure = true,
-                ExpirationScanFrequency = new TimeSpan(0, 0, 0, 30)
-            });            
-#else
-             _cache = new MemoryCache(cacheName, new NameValueCollection
+            _cache = new MemoryCache(cacheName, new NameValueCollection
             {
                 {"CacheMemoryLimitMegabytes", maxCacheSizeInMb.ToString()},
                 {"PollingInterval","00:00:30" }
             });
-#endif
-
             SizeInMb = maxCacheSizeInMb;
-            _slidingExpiration = new TimeSpan(0, 0, defaultCacheDurationInSeconds, 0);
-        }
+            _slidingExpiration = new TimeSpan(0, 0, defaultCacheDurationInSeconds, 0);                      
+        }       
 
         public int CacheItemCount
         {
-            get
-            {
-#if DNXCORE50
-                return _cache.Count;
-#else
-                return Convert.ToInt32(_cache.GetCount());
-#endif
-            }
+            get { return Convert.ToInt32(_cache.GetCount()); }
         }
 
         public int SizeInMb { get; }
@@ -78,16 +57,12 @@ namespace Ruzzie.Caching
                 TValue valueToStoreInCache = addMethodWhenKeyNotFoundAction.Invoke(key);
                 if (valueToStoreInCache != null)
                 {
-#if DNXCORE50
-                    _cache.Set(key, valueToStoreInCache, new MemoryCacheEntryOptions {SlidingExpiration = _slidingExpiration});
-#else
-                    _cache.Set(key, valueToStoreInCache, new CacheItemPolicy { SlidingExpiration = _slidingExpiration });
-#endif
+                    _cache.Set(key, valueToStoreInCache, new CacheItemPolicy { SlidingExpiration = _slidingExpiration });                   
                 }
                 return valueToStoreInCache;
             }
 
-            return (TValue)valueFromCache;
+            return (TValue)valueFromCache;           
         }
 
         public bool TryGet(string cacheKey, out TValue value)
@@ -98,7 +73,7 @@ namespace Ruzzie.Caching
                 value = default(TValue);
                 return false;
             }
-            value = (TValue)item;
+            value = (TValue) item;
 
             return true;
         }
@@ -120,7 +95,7 @@ namespace Ruzzie.Caching
                     _cache.Dispose();
                     _cache = null;
                 }
-            }
+            }           
         }
     }
 }

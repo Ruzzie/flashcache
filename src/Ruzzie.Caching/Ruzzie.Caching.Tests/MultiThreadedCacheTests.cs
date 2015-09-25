@@ -10,6 +10,13 @@ namespace Ruzzie.Caching.Tests
     [TestFixture]
     public class MultiThreadedCacheTests
     {
+
+        [Test]
+        public void MemoryCacheWithSizeLimitMultiThreadedTest()
+        {
+            MultiThreadPerformanceTest(new MemoryCacheWithSizeLimit<int>(4), 250000);
+        }
+
         [Test]
         public void FlashCacheMultiThreadedTest()
         {
