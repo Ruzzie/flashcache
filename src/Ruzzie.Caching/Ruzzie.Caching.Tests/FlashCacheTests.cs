@@ -51,6 +51,12 @@ namespace Ruzzie.Caching.Tests
         }
 
         [Test]
+        public void GetOrAddThrowsArgumentNullExceptionWhenKeyIsNull()
+        {
+            Assert.That(()=>new FlashCache<string,string>(1).GetOrAdd("1",null), Throws.TypeOf<ArgumentNullException>());
+        }
+
+        [Test]
         public void GetOrAddShouldCacheItem()
         {
             FlashCache<string, int> cache = new FlashCache<string, int>(1);
@@ -149,8 +155,6 @@ namespace Ruzzie.Caching.Tests
             new FlashCache<string, string>(10, StringComparer.OrdinalIgnoreCase);
         }
 
-     
-
         [Test]
         public void ShouldInitializeWithFixedMaximumSizeToNearestPowerOfTwo()
         {
@@ -237,6 +241,16 @@ namespace Ruzzie.Caching.Tests
             int value;
             cache.TryGet("1", out value);
             Assert.That(value, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void TryGetShouldReturnFalseForItemWithSameHashcodeAndDifferentValues()
+        {
+            FlashCache<KeyTestTypeWithConstantHash, string> cache = new FlashCache<KeyTestTypeWithConstantHash, string>(1);
+            cache.GetOrAdd(new KeyTestTypeWithConstantHash {Value = "a"}, hash => "1");
+
+            string value;
+            Assert.That(cache.TryGet(new KeyTestTypeWithConstantHash {Value = "b"}, out value), Is.False);
         }
     }
 }

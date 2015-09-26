@@ -14,13 +14,13 @@ namespace Ruzzie.Caching.Tests
         [Test]
         public void MemoryCacheWithSizeLimitMultiThreadedTest()
         {
-            MultiThreadPerformanceTest(new MemoryCacheWithSizeLimit<int>(4), 250000);
+            MultiThreadPerformanceTest(new MemoryCacheWithSizeLimit<int>(4), 150000);
         }
 
         [Test]
         public void FlashCacheMultiThreadedTest()
         {
-            MultiThreadPerformanceTest(new FlashCache<string, int>(4, StringComparer.OrdinalIgnoreCase,8), 250000);
+            MultiThreadPerformanceTest(new FlashCache<string, int>(4, StringComparer.OrdinalIgnoreCase,8), 150000);
         }
 
         private void MultiThreadPerformanceTest(IFixedSizeCache<string, int> cache, int loopCount)

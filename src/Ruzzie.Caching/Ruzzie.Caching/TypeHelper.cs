@@ -1,35 +1,37 @@
 using System;
 using System.Collections.Concurrent;
 using System.Reflection.Emit;
-using System.Runtime.InteropServices;
-
-//using System.Reflection.Emit;
 
 namespace Ruzzie.Caching
 {
     internal static class TypeHelper
     {
-
-
         public static int SizeOf<T>(T? obj) where T : struct
         {
-            if (obj == null) throw new ArgumentNullException("obj");
-
+            if (obj == null)
+            {
+                throw new ArgumentNullException("obj");
+            }
+        
             return SizeOf(obj.GetType());
         }
 
         public static int SizeOf<T>(T obj)
         {
-            if (obj == null) throw new ArgumentNullException("obj");
+            if (obj == null)
+            {
+                throw new ArgumentNullException("obj");
+            }
 
             return SizeOf(obj.GetType());
-
         }
 
         private static int SizeOf(Type t)
         {
-            if (t == null) throw new ArgumentNullException("t");
-
+            if (t == null)
+            {
+                throw new ArgumentNullException("t");
+            }
 
             return Cache.GetOrAdd(t, t2 =>
             {
