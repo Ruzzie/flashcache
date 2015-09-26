@@ -5,8 +5,6 @@ a fixed size high performant in memory cache
 [![Coverage Status](https://coveralls.io/repos/Ruzzie/flashcache/badge.svg?branch=master&service=github)](https://coveralls.io/github/Ruzzie/flashcache?branch=master)
 [![NuGet](https://img.shields.io/nuget/v/Ruzzie.Cache.FlashCache.svg)](https://www.nuget.org/packages/Ruzzie.Cache.FlashCache)
 
-https://img.shields.io/nuget/dt/Ruzzie.Cache.FlashCache.svg
-
 - Fixed size, everything is done in memory, so control over maximum size is needed to prevent out of memory errors
 - Multithreaded, multiple readers and writers are accessing the cache
 - Fast as hell
