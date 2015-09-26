@@ -23,7 +23,7 @@ namespace Ruzzie.Caching.Tests
             MultiThreadPerformanceTest(new FlashCache<string, int>(4, StringComparer.OrdinalIgnoreCase,8), 250000);
         }
 
-        private void MultiThreadPerformanceTest(IMemoryCacheWithLimit<string, int> cache, int loopCount)
+        private void MultiThreadPerformanceTest(IFixedSizeCache<string, int> cache, int loopCount)
         {
             ConcurrentBag<long> allTickTimes = new ConcurrentBag<long>();
             ConcurrentBag<long> allElapsedTimesMilliseconds = new ConcurrentBag<long>();
@@ -49,7 +49,7 @@ namespace Ruzzie.Caching.Tests
             Assert.That(cache.CacheItemCount, Is.LessThanOrEqualTo(300000));
         }
 
-        private static Stopwatch TimeParralelCacheWrite(IMemoryCacheWithLimit<string,int> cache, int loopCount)
+        private static Stopwatch TimeParralelCacheWrite(IFixedSizeCache<string,int> cache, int loopCount)
         {
             var hammertime = true;
 

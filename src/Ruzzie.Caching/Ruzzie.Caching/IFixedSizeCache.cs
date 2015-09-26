@@ -2,8 +2,16 @@
 
 namespace Ruzzie.Caching
 {
-    public interface IMemoryCacheWithLimit<TKey,TValue>
+    /// <summary>
+    /// Interface for a memory cache that has a fixed size.
+    /// </summary>
+    /// <typeparam name="TKey">The cache key.</typeparam>
+    /// <typeparam name="TValue">The value to cache</typeparam>
+    public interface IFixedSizeCache<TKey,TValue>
     {
+        /// <summary>
+        /// The current numbers of items that are cached.
+        /// </summary>
         int CacheItemCount { get; }
         /// <summary>
         ///     Get an item for the given key. Or add them using the given value factory.

@@ -42,6 +42,7 @@
     <Compile Include="MemoryCacheWithSizeLimitTests.cs" />
     <Compile Include="MultiThreadedCacheTests.cs" />
     <Compile Include="PowerOfTwoHelperTests.cs" />
+    <Compile Include="PrimeTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TypeHelperTests.cs" />
   </ItemGroup>

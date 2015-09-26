@@ -2,7 +2,7 @@
 
 namespace Ruzzie.Caching
 {
-   public static class PowerOfTwoHelper
+   internal static class PowerOfTwoHelper
     {
 
        public static int FindNearestPowerOfTwoLessThan(this int value)

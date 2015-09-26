@@ -4,7 +4,15 @@ using System.Threading;
 
 namespace Ruzzie.Caching
 {
-    public class FlashCache<TKey, TValue> : IMemoryCacheWithLimit<TKey, TValue>
+    /// <summary>
+    /// Fixed size high performant in memory cache.
+    ///     The use is a fixed size cache. Items are NOT guaranteed to be cached forever. Locations will be overwritten based
+    ///     on the hashcode.
+    ///     This cache guarantees a fixed size and read and write thread safety.
+    /// </summary>
+    /// <typeparam name="TKey">The cache key</typeparam>
+    /// <typeparam name="TValue">The value to cache.</typeparam>
+    public class FlashCache<TKey, TValue> : IFixedSizeCache<TKey, TValue>
     {
         private readonly IEqualityComparer<TKey> _comparer;
 
@@ -20,8 +28,8 @@ namespace Ruzzie.Caching
         /// </summary>
         /// <param name="maximumSizeInMb">The maximum desired size in MegaBytes of the cache. The cache size will be an approximation of the size in Mb's.</param>
         /// <param name="comparer">Optionally the desired equality comparer to use for comparing keys.</param>
-        /// <param name="averageSizeInBytesOfKey">Default -1. Only pass a value if the <see cref="TKey"/> is a value type. This parameter takes the given bytes for calculating the maximum size of the cache.</param>
-        /// <param name="averageSizeInBytesOfValue">Default -1. Only pass a value if the <see cref="TValue"/> is a value type. This parameter takes the given bytes for calculating the maximum size of the cache.</param>
+        /// <param name="averageSizeInBytesOfKey">Default -1. Only pass a value if the <typeparamref name="TKey"/> is a value type. This parameter takes the given bytes for calculating the maximum size of the cache.</param>
+        /// <param name="averageSizeInBytesOfValue">Default -1. Only pass a value if the <typeparamref name="TValue"/> is a value type. This parameter takes the given bytes for calculating the maximum size of the cache.</param>
         /// <remarks>The size in Mb's is an estimation. If the key or value for the cache is a reference type, it does not take into account the memory space the data of the reference type hold by default. All lookups in the cache are an O(1) operation.
         /// The maximum size of the Cache object itself is guaranteed.
         /// </remarks>
@@ -122,6 +130,9 @@ namespace Ruzzie.Caching
             }
         }
 
+        /// <summary>
+        /// The calculated maximum size in MB's that this cache should be.
+        /// </summary>
         public int SizeInMb
         {
             get { return _sizeInMb; }
