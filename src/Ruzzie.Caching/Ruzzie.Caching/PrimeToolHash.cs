@@ -1,16 +1,18 @@
-﻿namespace Ruzzie.Caching
+﻿using System;
+
+namespace Ruzzie.Caching
 {
     //http://www.dotnetperls.com/prime
     internal static class PrimeToolHash
     {
-        private static readonly int[] Primes;
+        private static readonly long[] Primes;
 
         static PrimeToolHash()
         {
             //
             // Initialize array of first primes before methods are called.
             //
-            Primes = new[]
+            Primes = new long[]
             {
                 3, 7, 11, 17, 23, 29, 37,
                 47, 59, 71, 89, 107, 131,
@@ -34,21 +36,22 @@
             };
         }
 
-        public static int GetPrime(int min)
+        public static long GetPrime(long min)
         {
             //
             // Get the first hashtable prime number
             // ... that is equal to or greater than the parameter.
             //
-            for (var i = 0; i < Primes.Length; i++)
+            for (long i = 0; i < Primes.Length; i++)
             {
-                int num2 = Primes[i];
+                long num2 = Primes[i];
                 if (num2 >= min)
                 {
                     return num2;
                 }
             }
-            for (int j = min | 1; j < 2147483647; j += 2)
+
+            for (long j = min | 1; j < Int64.MaxValue -2/*2147483647*/; j += 2)
             {
                 if (PrimeTool.IsPrime(j))
                 {

@@ -3,7 +3,7 @@ namespace Ruzzie.Caching
     //http://www.dotnetperls.com/prime
     internal static class PrimeTool
     {
-        public static bool IsPrime(int candidate)
+        public static bool IsPrime(long candidate)
         {
             // Test whether the parameter is a prime number.
             if ((candidate & 1) == 0)
@@ -18,7 +18,7 @@ namespace Ruzzie.Caching
             // ... This version was changed to test the square.
             // ... Original version tested against the square root.
             // ... Also we exclude 1 at the end.
-            for (var i = 3; (i*i) <= candidate; i += 2)
+            for (long i = 3; (i*i) <= candidate; i += 2)
             {
                 if ((candidate%i) == 0)
                 {
