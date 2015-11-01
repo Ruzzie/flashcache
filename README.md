@@ -20,7 +20,7 @@ a fixed size high performant in memory cache
 	//creates a cache of approx. 1 mb.
     FlashCache<string, int> flashCache = new FlashCache<string, int>(1);
 	
-	//When creating a cache for reference types it is advised to pass extra parameters to indicate the estimated size per cache entry.
+	//When creating a cache for reference types it is advised to pass extra parameters to indicate the estimated size per cache entry. For collection type a default size of 89 will be calculated and for strings a default size of 20
     // (Since the managed enviroment can give accurate sizes of value types)
  	FlashCache<string, string> cache = new FlashCache<string, string>(4,averageSizeInBytesOfKey:48, averageSizeInBytesOfValue:48);
 ```
