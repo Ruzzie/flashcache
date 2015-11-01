@@ -10,12 +10,18 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)AssemblyInfo.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ConcurrentCircularOverwriteBuffer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Constants.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FlashCache.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FlashCacheWithBuckets.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IFixedSizeCache.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MemoryCacheWithSizeLimit.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PowerOfTwoHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PrimeTool.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PrimeToolHash.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SizeHelpers.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TypeExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TypeHelper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Volatile.cs" />
   </ItemGroup>
 </Project>

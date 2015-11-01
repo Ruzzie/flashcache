@@ -11,9 +11,21 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ruzzie.Caching.NET46", "Ruz
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ruzzie.Caching.NET45", "Ruzzie.Caching.NET45\Ruzzie.Caching.NET45.csproj", "{839EDF2F-DD6C-4B54-81C9-24E4200AEAAF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ruzzie.Caching.Portable", "Ruzzie.Caching.Portable\Ruzzie.Caching.Portable.csproj", "{DEEC217B-5536-4157-87D9-ECD3F357D725}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Ruzzie.Caching.Minimum.Shared.Tests", "Ruzzie.Caching.Minimum.Shared.Tests\Ruzzie.Caching.Minimum.Shared.Tests.shproj", "{E4F9EF81-9FB6-4021-9609-DD404D274958}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ruzzie.Caching.Portable.Tests", "Ruzzie.Caching.Portable.Tests\Ruzzie.Caching.Portable.Tests.csproj", "{7C5B87FE-AAEC-4F90-B8E4-C40CB9644839}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ruzzie.Caching.TestProgram", "Ruzzie.Caching.TestProgram\Ruzzie.Caching.TestProgram.csproj", "{B9965B19-5637-4922-9DA0-EF637F6D2067}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		Ruzzie.Caching\Ruzzie.Caching.projitems*{43ad5c18-c3f9-44c9-a4d8-0dc3fc97c225}*SharedItemsImports = 4
+		Ruzzie.Caching.Minimum.Shared.Tests\Ruzzie.Caching.Minimum.Shared.Tests.projitems*{e4f9ef81-9fb6-4021-9609-dd404d274958}*SharedItemsImports = 13
+		Ruzzie.Caching.Minimum.Shared.Tests\Ruzzie.Caching.Minimum.Shared.Tests.projitems*{4bf5e39f-5046-43d4-b469-d092fa6c62b3}*SharedItemsImports = 4
+		Ruzzie.Caching.Minimum.Shared.Tests\Ruzzie.Caching.Minimum.Shared.Tests.projitems*{7c5b87fe-aaec-4f90-b8e4-c40cb9644839}*SharedItemsImports = 4
+		Ruzzie.Caching\Ruzzie.Caching.projitems*{deec217b-5536-4157-87d9-ecd3f357d725}*SharedItemsImports = 4
 		Ruzzie.Caching\Ruzzie.Caching.projitems*{1364395d-7c9f-4ed7-9ff2-043b24eea384}*SharedItemsImports = 13
 		Ruzzie.Caching\Ruzzie.Caching.projitems*{839edf2f-dd6c-4b54-81c9-24e4200aeaaf}*SharedItemsImports = 4
 	EndGlobalSection
@@ -34,6 +46,18 @@ Global
 		{839EDF2F-DD6C-4B54-81C9-24E4200AEAAF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{839EDF2F-DD6C-4B54-81C9-24E4200AEAAF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{839EDF2F-DD6C-4B54-81C9-24E4200AEAAF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DEEC217B-5536-4157-87D9-ECD3F357D725}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DEEC217B-5536-4157-87D9-ECD3F357D725}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DEEC217B-5536-4157-87D9-ECD3F357D725}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DEEC217B-5536-4157-87D9-ECD3F357D725}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7C5B87FE-AAEC-4F90-B8E4-C40CB9644839}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7C5B87FE-AAEC-4F90-B8E4-C40CB9644839}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7C5B87FE-AAEC-4F90-B8E4-C40CB9644839}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7C5B87FE-AAEC-4F90-B8E4-C40CB9644839}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B9965B19-5637-4922-9DA0-EF637F6D2067}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B9965B19-5637-4922-9DA0-EF637F6D2067}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B9965B19-5637-4922-9DA0-EF637F6D2067}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B9965B19-5637-4922-9DA0-EF637F6D2067}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
