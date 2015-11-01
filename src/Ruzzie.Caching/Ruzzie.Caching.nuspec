@@ -19,6 +19,6 @@
 		<file src="..\..\README.md" />
         <file src="Ruzzie.Caching.NET46\bin\Release\" target="lib\net46\" />
         <file src="Ruzzie.Caching.NET45\bin\Release\" target="lib\net45\" />
-        <!--file src="lib\portable-net4+wp8+win8\" target="lib\portable-net4+wp8+win8\" /-->
+        <file src="Ruzzie.Caching.Portable\bin\Release\" target="lib\portable-net45+sl50+netcore45+wpa81+wp8" />
     </files>
 </package>
