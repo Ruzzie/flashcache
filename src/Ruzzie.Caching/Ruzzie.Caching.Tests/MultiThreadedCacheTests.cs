@@ -4,13 +4,13 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
+using Ruzzie.Caching;
 
 namespace Ruzzie.Caching.Tests
 {
     [TestFixture]
     public class MultiThreadedCacheTests
-    {
-
+    {       
         [Test]
         public void MemoryCacheWithSizeLimitMultiThreadedTest()
         {
@@ -23,7 +23,13 @@ namespace Ruzzie.Caching.Tests
             MultiThreadPerformanceTest(new FlashCache<string, int>(4, StringComparer.OrdinalIgnoreCase,8), 150000);
         }
 
-        private void MultiThreadPerformanceTest(IFixedSizeCache<string, int> cache, int loopCount)
+        [Test]
+        public void FlashCacheWithBucketsMultiThreadedTest()
+        {
+            MultiThreadPerformanceTest(new FlashCacheWithBuckets<string, int>(4, StringComparer.OrdinalIgnoreCase, 8), 150000);
+        }
+
+        private static void MultiThreadPerformanceTest(IFixedSizeCache<string, int> cache, int loopCount)
         {
             ConcurrentBag<long> allTickTimes = new ConcurrentBag<long>();
             ConcurrentBag<long> allElapsedTimesMilliseconds = new ConcurrentBag<long>();

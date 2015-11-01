@@ -13,6 +13,20 @@ namespace Ruzzie.Caching
         /// The current numbers of items that are cached.
         /// </summary>
         int CacheItemCount { get; }
+
+        /// <summary>
+        /// The calculated maximum size in MB's that this cache should be.
+        /// </summary>
+        int SizeInMb { get; }
+
+        /// <summary>
+        /// Gets the potentially maximum number of items the cache can hold.
+        /// </summary>
+        /// <value>
+        /// The maximum item count.
+        /// </value>
+        int MaxItemCount { get; }
+
         /// <summary>
         ///     Get an item for the given key. Or add them using the given value factory.
         /// </summary>
@@ -35,5 +49,33 @@ namespace Ruzzie.Caching
         /// <returns>true if the <see cref="FlashCache{TKey,TValue}"/> contains an element with the specified key; otherwise, false.</returns>
         /// <remarks>If the key is not found, then the value parameter gets the appropriate default value for the type TValue; for example, 0 (zero) for integer types, false for Boolean types, and null for reference types. </remarks>
         bool TryGet(TKey cacheKey, out TValue value);
+
+
+        /// <summary>
+        /// Trims the cache when is has grown to big. This method is for callers who want to have more control over the cache size. Implementors of this interface are responsible for keeping the cachesize as fixed as possible.
+        /// When this method does nothing or no items are removed return 0.
+        /// </summary>
+        /// <param name="trimOptions">The trim options to use when trimming.</param>
+        /// <returns>The number of items removed from the cache.</returns>
+        int Trim(TrimOptions trimOptions);
+    }
+
+    /// <summary>
+    /// Options for trimming the cache.
+    /// </summary>
+    public enum TrimOptions
+    {
+        /// <summary>
+        /// Careful trimming option.
+        /// </summary>
+        Cautious,
+        /// <summary>
+        /// Default trimming option.
+        /// </summary>
+        Default,
+        /// <summary>
+        /// Aggressive cache trimming option. This will allow the cache to aggressively eject values from the cache.
+        /// </summary>
+        Aggressive,
     }
 }

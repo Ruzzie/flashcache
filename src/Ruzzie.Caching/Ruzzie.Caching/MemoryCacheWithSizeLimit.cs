@@ -1,10 +1,10 @@
-﻿using System;
+﻿#if !PORTABLE
+using System;
 using System.Collections.Specialized;
 using System.Runtime.Caching;
 
 namespace Ruzzie.Caching
 {
-
     /// <summary>
     /// A fixed size cache that uses <see cref="MemoryCache"/> as a backing cache.
     /// </summary>
@@ -67,6 +67,14 @@ namespace Ruzzie.Caching
         // ReSharper disable once UnusedAutoPropertyAccessor.Global
         public int SizeInMb { get; }
 
+        /// <summary>
+        /// Gets the potentially maximum number of items the cache can hold.
+        /// </summary>
+        /// <value>
+        /// The maximum item count.
+        /// </value>
+        public int MaxItemCount { get { return -1; } }
+
 
         /// <summary>
         /// Get or add an item to the cache.
@@ -116,6 +124,16 @@ namespace Ruzzie.Caching
             return true;
         }
 
+        /// <summary>
+        /// Trims the cache when is has grown to big. This method is for callers who want to have more control over the cache size. Implementors of this interface are responsible for keeping the cachesize as fixed as possible.
+        /// When this method does nothing or no items are removed return 0.
+        /// </summary>
+        /// <param name="trimOptions">The trim options to use when trimming.</param>
+        /// <returns>The number of items removed from the cache.</returns>
+        public int Trim(TrimOptions trimOptions)
+        {
+            return (int) _cache.Trim( (int)(trimOptions)*2);
+        }
 
         /// <summary>
         /// Releases unmanaged and - optionally - managed resources.
@@ -144,3 +162,4 @@ namespace Ruzzie.Caching
         }
     }
 }
+#endif

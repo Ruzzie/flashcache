@@ -5,7 +5,6 @@ namespace Ruzzie.Caching.Tests
     [TestFixture]
     public class PrimeTests
     {
-
         [TestCase(0,false)]
         [TestCase(1,false)]
         [TestCase(2,true)]
@@ -27,6 +26,6 @@ namespace Ruzzie.Caching.Tests
         public void GetPrime(int min, int expected)
         {
             Assert.That(PrimeToolHash.GetPrime(min),Is.EqualTo(expected));
-        }
+        }     
     }
 }

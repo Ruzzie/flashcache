@@ -2,17 +2,16 @@
 
 namespace Ruzzie.Caching
 {
-   internal static class PowerOfTwoHelper
+    internal static class PowerOfTwoHelper
     {
-
-       public static int FindNearestPowerOfTwoLessThan(this int value)
-       {
+        public static int FindNearestPowerOfTwoLessThan(this int value)
+        {
             if (value <= 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(value), "Cannot be negative.");
             }
 
-            uint result = FindNearestPowerOfTwoLessThan((uint)value);
+            uint result = FindNearestPowerOfTwoLessThan((uint) value);
             return Convert.ToInt32(result);
         }
 
@@ -24,7 +23,7 @@ namespace Ruzzie.Caching
             }
 
             const int maxSignedPowerOfTwo = 1073741824;
-            uint result = FindNearestPowerOfTwo((uint)value);
+            uint result = FindNearestPowerOfTwo((uint) value);
 
             if (result > maxSignedPowerOfTwo)
             {
@@ -36,7 +35,7 @@ namespace Ruzzie.Caching
             return Convert.ToInt32(result);
         }
 
-       private static uint FindNearestPowerOfTwo(this uint value)
+        private static uint FindNearestPowerOfTwo(this uint value)
         {
             //http://stackoverflow.com/questions/5525122/c-sharp-math-question-smallest-power-of-2-bigger-than-x
             uint x = value;
@@ -50,14 +49,13 @@ namespace Ruzzie.Caching
             return result;
         }
 
-       private static uint FindNearestPowerOfTwoLessThan(this uint value)
+        internal static uint FindNearestPowerOfTwoLessThan(this uint value)
         {
             if (value == 2)
             {
                 return 2;
             }
 
-          
             value = value >> 1;
             value++;
 
@@ -68,8 +66,13 @@ namespace Ruzzie.Caching
             x |= (x >> 4);
             x |= (x >> 8);
             x |= (x >> 16);
-            uint result =  (x + 1);
+            uint result = (x + 1);
             return result;
+        }
+
+        public static bool IsPowerOfTwo(this uint x)
+        {
+            return ((x & (x - 1)) == 0);
         }
     }
 }

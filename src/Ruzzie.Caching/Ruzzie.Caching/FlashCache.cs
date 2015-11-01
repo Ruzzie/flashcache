@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading;
 
 namespace Ruzzie.Caching
 {
@@ -19,6 +18,7 @@ namespace Ruzzie.Caching
         private readonly FlashEntry[] _entries;
         private readonly int _sizeInMb;
         private readonly int _maxItemCount;
+        private readonly int _indexMask;
 
         /// <summary>
         ///     Constructor. Creates the FlashCache of a fixed maximumSizeInMb.
@@ -30,6 +30,7 @@ namespace Ruzzie.Caching
         /// <param name="comparer">Optionally the desired equality comparer to use for comparing keys.</param>
         /// <param name="averageSizeInBytesOfKey">Default -1. Only pass a value if the <typeparamref name="TKey"/> is a value type. This parameter takes the given bytes for calculating the maximum size of the cache.</param>
         /// <param name="averageSizeInBytesOfValue">Default -1. Only pass a value if the <typeparamref name="TValue"/> is a value type. This parameter takes the given bytes for calculating the maximum size of the cache.</param>
+        /// <exception cref="ArgumentException">When the maximumSizeInMb is less than 1.</exception>
         /// <remarks>The size in Mb's is an estimation. If the key or value for the cache is a reference type, it does not take into account the memory space the data of the reference type hold by default. All lookups in the cache are an O(1) operation.
         /// The maximum size of the Cache object itself is guaranteed.
         /// </remarks>
@@ -40,26 +41,23 @@ namespace Ruzzie.Caching
                 throw new ArgumentException("Cannot be less than one.", nameof(maximumSizeInMb));
             }
 
-            long twoGbInBytes = (2048L*1024L*1024L);
-            
-            int entryTypeSize = TypeHelper.SizeOf(new FlashEntry(-1,default(TKey),default(TValue))) + (averageSizeInBytesOfKey > 0 ? averageSizeInBytesOfKey : 0) + (averageSizeInBytesOfValue > 0 ? averageSizeInBytesOfValue : 0);            
-            long probableMaxArrayLength = twoGbInBytes/(entryTypeSize + 2);
+            int entryTypeSize = CalculateEntryTypeSize(averageSizeInBytesOfKey, averageSizeInBytesOfValue);
 
-            long desiredArrayLength = (maximumSizeInMb*(1024L)*(1024L))/entryTypeSize;
-
-            if (desiredArrayLength > probableMaxArrayLength)
-            {
-                _maxItemCount = Convert.ToInt32(probableMaxArrayLength).FindNearestPowerOfTwoLessThan();
-            }
-            else
-            {
-                _maxItemCount = Convert.ToInt32(desiredArrayLength);
-            }
+            _maxItemCount = SizeHelpers.CalculateMaxItemCountInPowerOfTwo(maximumSizeInMb, entryTypeSize);
+            _indexMask = _maxItemCount - 1;
 
             _sizeInMb = ((_maxItemCount * entryTypeSize)/1024)/1024;
 
             _comparer = comparer ?? EqualityComparer<TKey>.Default;
             _entries = new FlashEntry[_maxItemCount];          
+        }
+
+        internal static int CalculateEntryTypeSize(int averageSizeInBytesOfKey = -1, int averageSizeInBytesOfValue = -1)
+        {
+            int entryTypeSize = TypeHelper.SizeOf(new FlashEntry(-1, default(TKey), default(TValue))) +
+                                (averageSizeInBytesOfKey > 0 ? averageSizeInBytesOfKey : 0) +
+                                (averageSizeInBytesOfValue > 0 ? averageSizeInBytesOfValue : 0);
+            return entryTypeSize;
         }
 
         /// <summary>
@@ -115,12 +113,7 @@ namespace Ruzzie.Caching
                 int itemCount = 0;
                 for (int i = 0; i < _entries.Length; i++)
                 {
-                    FlashEntry flashEntry = _entries[i];
-#if NET40
-                    Thread.MemoryBarrier();
-#else
-                    Interlocked.MemoryBarrier();
-#endif
+                    FlashEntry flashEntry = Volatile.Read(ref _entries[i]);
                     if (!ReferenceEquals(flashEntry, null))
                     {
                         itemCount++;
@@ -140,14 +133,7 @@ namespace Ruzzie.Caching
 
         private FlashEntry GetFlashEntryWithMemoryBarier(int targetEntry)
         {
-            FlashEntry entry = _entries[targetEntry]; //copy to local variable for thread safety
-            //"volatile" read of value
-#if NET40
-            Thread.MemoryBarrier();
-#else
-            Interlocked.MemoryBarrier();
-#endif
-            return entry;
+            return Volatile.Read(ref _entries[targetEntry]);
         }
 
         private bool KeyIsEqual(TKey key, FlashEntry entry, int hashCode)
@@ -157,24 +143,21 @@ namespace Ruzzie.Caching
 
         private int GetTargetEntryIndexForHashcode(int hashCode)
         {
-            return hashCode & (_maxItemCount - 1); // bitwise % operator since array is always length power of 2
+            unchecked
+            {               
+                return (hashCode) & (_indexMask); // bitwise % operator since array is always length power of 2
+            }
         }
 
         private int GetHashcodeForKey(TKey key)
         {
-            return _comparer.GetHashCode(key) & 0x7FFFFFFF; //lower 31 bits
+            return _comparer.GetHashCode(key);
         }
 
         private void InsertEntry(TKey key, int hashCode, TValue value, int targetEntry)
         {
             FlashEntry entryToInsert = new FlashEntry(hashCode ,key, value);
-            //"volatile" read of value
-#if NET40
-            Thread.MemoryBarrier();
-#else
-            Interlocked.MemoryBarrier();
-#endif
-            _entries[targetEntry] = entryToInsert;
+            Volatile.Write(ref _entries[targetEntry],entryToInsert);
         }
 
         /// <summary>
@@ -207,9 +190,19 @@ namespace Ruzzie.Caching
             return true;
         }
 
-        private class FlashEntry
+        /// <summary>
+        /// Trims the cache. This method always returns 0 for <see cref="FlashCache{TKey,TValue}"/>. Since it has a guaranteed fixed size and needs no trimming.
+        /// </summary>
+        /// <param name="trimOptions">The trim options.</param>
+        /// <returns>0</returns>
+        public int Trim(TrimOptions trimOptions)
         {
-            public readonly int HashCode; // Lower 31 bits of hash code 
+            return 0;//no trim necesarry with this implementation.
+        }
+
+        internal class FlashEntry
+        {
+            public readonly int HashCode;
             public readonly TKey Key;
             public readonly TValue Value;
         
@@ -220,7 +213,6 @@ namespace Ruzzie.Caching
                 Key = key;
                 Value = value;
             }         
-           
         }
     }
 }
