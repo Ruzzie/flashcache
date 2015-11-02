@@ -107,6 +107,53 @@ namespace Ruzzie.Caching.Tests
             Assert.That(cache.RealCacheItemCount, Is.EqualTo(cache.MaxItemCount));
         }
 
+        [Test]
+        public void TrimShouldRemoveZeroEntriesWhenCacheIsEmpty()
+        {
+            FlashCacheWithBuckets<string, byte> cache = new FlashCacheWithBuckets<string, byte>(1);
+
+            int count = cache.Trim(TrimOptions.Default);
+
+            Assert.That(count,Is.EqualTo(0));
+        }
+
+        [Test]
+        public void TrimWithDefaultShouldRemoveFivePercent()
+        {
+            FlashCacheWithBuckets<string, byte> cache = new FlashCacheWithBuckets<string, byte>(1);
+            for (int i = 0; i < cache.MaxItemCount * 2; i++)
+            {
+                cache.GetOrAdd(i.ToString(), key => 1);
+            }
+            int currentItemCount = cache.CacheItemCount;
+
+            int trimCount = cache.Trim(TrimOptions.Default);
+
+            Assert.That( (double) trimCount / currentItemCount, Is.EqualTo(0.05).Within(0.01));
+        }
+
+        [Test]
+        public void TrimWithDefaultShouldRemoveTwo()
+        {
+            FlashCacheWithBuckets<string, byte> cache = new FlashCacheWithBuckets<string, byte>(1);
+            for (int i = 0; i < cache.MaxItemCount * 2; i++)
+            {
+                cache.GetOrAdd(i.ToString(), key => 1);
+            }
+
+            int trimCount = cache.Trim(TrimOptions.Cautious);
+
+            Assert.That(trimCount, Is.EqualTo(2));
+        }
+
+        [Test]
+        public void DisposeShouldNotThrowException()
+        {
+            FlashCacheWithBuckets<string, byte> cache = new FlashCacheWithBuckets<string, byte>(1);
+
+            Assert.That(()=> cache.Dispose(), Throws.Nothing);
+        }
+
         protected override IFixedSizeCache<TKey, TValue> CreateCache<TKey, TValue>(int size)
         {
             return new FlashCacheWithBuckets<TKey, TValue>(size);

@@ -194,5 +194,13 @@ namespace Ruzzie.Caching.Tests
             Assert.That(readValuesHashSet.Keys.Distinct().Count() , Is.EqualTo(cacheSize));
             Assert.That(buffer.Count, Is.EqualTo(0));
         }
+
+        [TestCase(1)]
+        [TestCase(0)]
+        [TestCase(-1)]
+        public void ConstructorThrowsArgumentExceptionWhenSizeIsLessThanTwo(int size)
+        {
+            Assert.That(()=> new ConcurrentCircularOverwriteBuffer<int>(size), Throws.Exception);
+        }
     }
 }

@@ -83,6 +83,7 @@ namespace Ruzzie.Caching
         }
 
         private bool _disposed;
+        private readonly Random _random = new Random(Environment.TickCount);
 
         /// <summary>
         /// Disposed unmanaged resources.
@@ -121,7 +122,6 @@ namespace Ruzzie.Caching
         /// </summary>
         ~FlashCacheWithBuckets()
         {
-            //_trimTimer?.Dispose();
             Dispose(false);
         }
 
@@ -319,8 +319,7 @@ namespace Ruzzie.Caching
                     if (options == TrimOptions.Aggressive)
                     {
                         //boot some random item out of the cache
-                        Random random = new Random(Environment.TickCount);
-                        hashCode = random.Next();
+                        hashCode = _random.Next();
                     }
                     else
                     {
@@ -441,7 +440,6 @@ namespace Ruzzie.Caching
             {
                 if (KeyIsEqual(key, hashCode, entry))
                 {
-                    //value = entry.Value;
                     return true;
                 }
 

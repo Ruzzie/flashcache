@@ -51,5 +51,23 @@ namespace Ruzzie.Caching.Tests
         {
             Assert.That(() => (-100).FindNearestPowerOfTwoEqualOrGreaterThan(), Throws.TypeOf<ArgumentOutOfRangeException>());
         }
+
+        [TestCase(0)]
+        [TestCase(-1)]
+        public void FindNearestPowerOfTwoEqualOrLessThanThrowsArgumentExceptionWhenValueIsLessThanOrEqualZero(int value)
+        {
+            Assert.That(()=>value.FindNearestPowerOfTwoEqualOrLessThan(),Throws.Exception);
+        }
+
+        [TestCase((uint) 2,true)]
+        [TestCase((uint) 3, false)]
+        [TestCase((uint) 1024, true)]
+        [TestCase((uint) 999, false)]
+        [TestCase((uint) 1073741824, true)]
+        [TestCase((uint) 2073741824, false)]
+        public void IsPowerOfTwoTests(uint value, bool expected)
+        {
+            Assert.That(value.IsPowerOfTwo(), Is.EqualTo(expected));
+        }
     }
 }
