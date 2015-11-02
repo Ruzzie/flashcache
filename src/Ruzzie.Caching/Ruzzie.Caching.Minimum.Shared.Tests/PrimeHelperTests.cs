@@ -3,7 +3,7 @@
 namespace Ruzzie.Caching.Tests
 {
     [TestFixture]
-    public class PrimeTests
+    public class PrimeHelperTests
     {
         [TestCase(0,false)]
         [TestCase(1,false)]
@@ -14,7 +14,7 @@ namespace Ruzzie.Caching.Tests
         [TestCase(9199361, false)]
         public void IsPrime(int number, bool expected)
         {
-            Assert.That(PrimeTool.IsPrime(number),Is.EqualTo(expected));
+            Assert.That(PrimeHelper.IsPrime(number),Is.EqualTo(expected));
         }
 
         [TestCase(1,3)]
@@ -25,7 +25,7 @@ namespace Ruzzie.Caching.Tests
         [TestCase(9199391, 9199391)]
         public void GetPrime(int min, int expected)
         {
-            Assert.That(PrimeToolHash.GetPrime(min),Is.EqualTo(expected));
+            Assert.That(PrimeHelper.GetPrime(min),Is.EqualTo(expected));
         }     
     }
 }

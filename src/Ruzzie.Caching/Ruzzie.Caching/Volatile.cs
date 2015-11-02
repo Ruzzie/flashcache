@@ -1,8 +1,10 @@
-﻿namespace Ruzzie.Caching
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace Ruzzie.Caching
 {
     /// <summary>
     /// Contains methods for performing volatile memory operations.
-    /// For portability reasons this wraps either <see cref="System.Threading.Volatile"/> or implements Thread.MemoryBarier() on framework versions that do not support that class.
+    /// For portability reasons this wraps either System.Threading.Volatile or implements Thread.MemoryBarier() on framework versions that do not support that class.
     /// </summary>
     public static class Volatile
     {
@@ -12,6 +14,7 @@
         /// <param name="location">The field where the object reference is written.</param>
         /// <param name="value">The object reference to write. The reference is written immediately so that it is visible to all processors in the computer.</param>
         /// <typeparam name="T">The type of field to write. This must be a reference type, not a value type.</typeparam>
+        [SuppressMessage("ReSharper", "RedundantAssignment")]
         public static void Write<T>(ref T location, T value) where T : class
         {
 

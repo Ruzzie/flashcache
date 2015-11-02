@@ -1,12 +1,13 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
+
 #pragma warning disable 420
 
 namespace Ruzzie.Caching
 {
     /// <summary>
-    /// Cirular buffer that overwrites values when the capacity is reached.
+    ///     Cirular buffer that overwrites values when the capacity is reached.
     /// </summary>
     /// <typeparam name="T"></typeparam>
     internal class ConcurrentCircularOverwriteBuffer<T>
@@ -16,10 +17,10 @@ namespace Ruzzie.Caching
         private volatile int _writeHeader;
         private volatile int _readHeader;
         private volatile int _count;
-        private readonly int _indexMask;        
+        private readonly int _indexMask;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ConcurrentCircularOverwriteBuffer{T}"/> class.
+        ///     Initializes a new instance of the <see cref="ConcurrentCircularOverwriteBuffer{T}" /> class.
         /// </summary>
         /// <param name="capacity">The desired size. Internally this will always be set to a power of 2 for performance.</param>
         /// <exception cref="ArgumentOutOfRangeException">size;Size has to be greater or equal to 2.</exception>
@@ -27,17 +28,20 @@ namespace Ruzzie.Caching
         {
             if (capacity < 2)
             {
-                throw new ArgumentOutOfRangeException("capacity","Size has to be greater or equal to 2.");
+                throw new ArgumentOutOfRangeException("capacity", "Size has to be greater or equal to 2.");
             }
-            _capacity = capacity.FindNearestPowerOfTwo();
+            _capacity = capacity.FindNearestPowerOfTwoEqualOrGreaterThan();
             _buffer = new T[_capacity];
-            _indexMask =  (_capacity - 1);
+            _indexMask = (_capacity - 1);
 
             _writeHeader = _indexMask;
-            _readHeader  = _indexMask;
+            _readHeader = _indexMask;
         }
 
-        public int Count { get { return _count; } }
+        public int Count
+        {
+            get { return _count; }
+        }
 
         public void CopyTo(Array array, int index)
         {
@@ -48,18 +52,19 @@ namespace Ruzzie.Caching
         {
             int writeHeaderLocal = _writeHeader;
 
-            while (Interlocked.CompareExchange(ref _writeHeader, NextWriteIndex(writeHeaderLocal,_indexMask), writeHeaderLocal) != writeHeaderLocal)
+            while (Interlocked.CompareExchange(ref _writeHeader, NextWriteIndex(writeHeaderLocal, _indexMask), writeHeaderLocal) !=
+                   writeHeaderLocal)
             {
                 SpinWait();
                 writeHeaderLocal = _writeHeader;
             }
-          
+
             _buffer[writeHeaderLocal] = value;
 
             if (_count < _capacity)
-            {               
+            {
                 Interlocked.Increment(ref _count);
-            }                       
+            }
         }
 
         public T ReadNext()
@@ -79,10 +84,11 @@ namespace Ruzzie.Caching
                 value = default(T);
                 return false;
             }
-       
+
             int readHeaderLocal = _readHeader;
-          
-            while (Interlocked.CompareExchange(ref _readHeader, NextReadIndex(readHeaderLocal, _indexMask), readHeaderLocal) != readHeaderLocal)
+
+            while (Interlocked.CompareExchange(ref _readHeader, NextReadIndex(readHeaderLocal, _indexMask), readHeaderLocal) !=
+                   readHeaderLocal)
             {
                 SpinWait();
                 readHeaderLocal = _readHeader;
@@ -90,7 +96,7 @@ namespace Ruzzie.Caching
             value = _buffer[readHeaderLocal];
 
             Interlocked.Decrement(ref _count);
-           
+
             return true;
         }
 
@@ -113,8 +119,8 @@ namespace Ruzzie.Caching
             op = op << 1;
         }
 #else
-        [SuppressMessage("ReSharper", "StaticMemberInGenericType")]
-        private static readonly int SpinWaitIterations = 1;
+        [SuppressMessage("ReSharper", "StaticMemberInGenericType")] private static readonly int SpinWaitIterations = 1;
+
         private static void SpinWait()
         {
             Thread.SpinWait(SpinWaitIterations);

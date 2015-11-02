@@ -11,6 +11,7 @@ namespace Ruzzie.Caching.Tests
         [TestCase(250, 256)]
         [TestCase(100, 128)]
         [TestCase(1000, 1024)]
+        [TestCase(1024, 1024)]
         [TestCase(1500, 2048)]
         [TestCase(60000, 65536)]
         [TestCase(100000, 131072)]
@@ -19,7 +20,7 @@ namespace Ruzzie.Caching.Tests
         [TestCase(1073741800, 1073741824)]
         public void FindNearestPowerOfTwoForGivenValue(int value, int expected)
         {
-            Assert.That(value.FindNearestPowerOfTwo(), Is.EqualTo(expected));
+            Assert.That(value.FindNearestPowerOfTwoEqualOrGreaterThan(), Is.EqualTo(expected));
         }
 
         [TestCase(2, 2)]
@@ -36,19 +37,19 @@ namespace Ruzzie.Caching.Tests
         [TestCase(1273741800, 1073741824)]
         public void FindNearestPowerOfTwoLessThanForGivenValue(int value, int expected)
         {
-            Assert.That(value.FindNearestPowerOfTwoLessThan(), Is.EqualTo(expected));
+            Assert.That(value.FindNearestPowerOfTwoEqualOrLessThan(), Is.EqualTo(expected));
         }
 
         [Test]
         public void FindNearestPowerOfTwoShouldThrowArumentExceptionWhenTargetValueWouldBegreaterThanMaxInt32()
         {
-            Assert.That(() => (int.MaxValue - 1).FindNearestPowerOfTwo(), Throws.TypeOf<ArgumentOutOfRangeException>());
+            Assert.That(() => (int.MaxValue - 1).FindNearestPowerOfTwoEqualOrGreaterThan(), Throws.TypeOf<ArgumentOutOfRangeException>());
         }
 
         [Test]
         public void FindNearestPowerOfTwoShouldThrowArumentExceptionWhenTargetValueIsLessThan0()
         {
-            Assert.That(() => (-100).FindNearestPowerOfTwo(), Throws.TypeOf<ArgumentOutOfRangeException>());
+            Assert.That(() => (-100).FindNearestPowerOfTwoEqualOrGreaterThan(), Throws.TypeOf<ArgumentOutOfRangeException>());
         }
     }
 }

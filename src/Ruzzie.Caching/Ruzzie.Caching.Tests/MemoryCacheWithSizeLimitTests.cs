@@ -90,7 +90,7 @@ namespace Ruzzie.Caching.Tests
         [Test]
         public void SingleThreadPerformanceTest()
         {
-            using (MemoryCacheWithSizeLimit<int> cache = new MemoryCacheWithSizeLimit<int>(250000))
+            using (MemoryCacheWithSizeLimit<int> cache = new MemoryCacheWithSizeLimit<int>(10000))
             {
                 ConcurrentBag<long> allTickTimes = new ConcurrentBag<long>();
                 ConcurrentBag<long> allElapsedTimesMilliseconds = new ConcurrentBag<long>();
@@ -107,9 +107,6 @@ namespace Ruzzie.Caching.Tests
 
                 Console.WriteLine("Average ticks: " + averageTickTime);
                 Console.WriteLine("Average ms: " + averageTimeMilliseconds);
-
-                //Assert.That(averageTickTime, Is.LessThanOrEqualTo(1033126));
-                //Assert.That(averageTimeMilliseconds, Is.LessThanOrEqualTo(343));
             }
         }
 

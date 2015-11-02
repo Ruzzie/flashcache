@@ -53,13 +53,13 @@ namespace Ruzzie.Caching
                 throw new ArgumentException("Cannot be less than one.", nameof(maximumSizeInMb));
             }
 
-            int entryTypeSize = CalculateEntryTypeSize(averageSizeInBytesOfKey, averageSizeInBytesOfValue);
+            int flashEntryTypeSize = CalculateFlashEntryTypeSize(averageSizeInBytesOfKey, averageSizeInBytesOfValue);
 
-            _maxItemCount = SizeHelpers.CalculateMaxItemCountInPowerOfTwo(maximumSizeInMb, entryTypeSize);
+            _maxItemCount = SizeHelper.CalculateMaxItemCountInPowerOfTwo(maximumSizeInMb, flashEntryTypeSize);
 
             _indexMask = _maxItemCount - 1;
 
-            _sizeInMb = ((_maxItemCount * entryTypeSize) / 1024) / 1024;
+            _sizeInMb = ((_maxItemCount * flashEntryTypeSize) / 1024) / 1024;
 
             _comparer = comparer ?? EqualityComparer<TKey>.Default;
             _entries = new FlashEntry[_maxItemCount];
@@ -125,7 +125,7 @@ namespace Ruzzie.Caching
             Dispose(false);
         }
 
-        internal static int CalculateEntryTypeSize(int averageSizeInBytesOfKey = -1, int averageSizeInBytesOfValue = -1)
+        internal static int CalculateFlashEntryTypeSize(int averageSizeInBytesOfKey = -1, int averageSizeInBytesOfValue = -1)
         {
             int entryTypeSize = TypeHelper.SizeOf(new FlashEntry(-1, default(TKey), default(TValue))) +
                                 (averageSizeInBytesOfKey > 0 ? averageSizeInBytesOfKey : 0) +

@@ -14,19 +14,19 @@ namespace Ruzzie.Caching.Tests
         [Test]
         public void MemoryCacheWithSizeLimitMultiThreadedTest()
         {
-            MultiThreadPerformanceTest(new MemoryCacheWithSizeLimit<int>(4), 150000);
+            MultiThreadPerformanceTest(new MemoryCacheWithSizeLimit<int>(4), 50000);
         }
 
         [Test]
         public void FlashCacheMultiThreadedTest()
         {
-            MultiThreadPerformanceTest(new FlashCache<string, int>(4, StringComparer.OrdinalIgnoreCase,8), 150000);
+            MultiThreadPerformanceTest(new FlashCache<string, int>(4, StringComparer.OrdinalIgnoreCase,8), 50000);
         }
 
         [Test]
         public void FlashCacheWithBucketsMultiThreadedTest()
         {
-            MultiThreadPerformanceTest(new FlashCacheWithBuckets<string, int>(4, StringComparer.OrdinalIgnoreCase, 8), 150000);
+            MultiThreadPerformanceTest(new FlashCacheWithBuckets<string, int>(4, StringComparer.OrdinalIgnoreCase, 8), 50000);
         }
 
         private static void MultiThreadPerformanceTest(IFixedSizeCache<string, int> cache, int loopCount)
@@ -50,7 +50,7 @@ namespace Ruzzie.Caching.Tests
             Console.WriteLine("Average ms: " + averageTimeMilliseconds);
 
             //Assert.That(averageTickTime, Is.LessThanOrEqualTo(3005055));
-            //Assert.That(averageTimeMilliseconds, Is.LessThanOrEqualTo(1826)); //15298 spinlock || 1826 normal lock || 800 - 1300 MemoryCache || 300 flashcache
+            //Assert.That(averageTimeMilliseconds, Is.LessThanOrEqualTo(1826)); //spinlock > normal lock > MemoryCache > flashcaches
 
             Assert.That(cache.CacheItemCount, Is.LessThanOrEqualTo(300000));
         }

@@ -10,52 +10,12 @@ namespace Ruzzie.Caching.Tests
 {
     public abstract class FixedCacheBaseTests : CacheEfficiencyTests
     {
-        protected class KeyTestTypeWithConstantHash
-        {
-            public string Value;
-
-            public override int GetHashCode()
-            {
-                return 7;
-            }
-
-            protected bool Equals(KeyTestTypeWithConstantHash other)
-            {
-                return string.Equals(Value, other.Value);
-            }
-
-            public override bool Equals(object obj)
-            {
-                if (ReferenceEquals(null, obj))
-                {
-                    return false;
-                }
-                if (ReferenceEquals(this, obj))
-                {
-                    return true;
-                }
-                if (obj.GetType() != GetType())
-                {
-                    return false;
-                }
-                return Equals((KeyTestTypeWithConstantHash)obj);
-            }
-
-            public static bool operator ==(KeyTestTypeWithConstantHash left, KeyTestTypeWithConstantHash right)
-            {
-                return Equals(left, right);
-            }
-
-            public static bool operator !=(KeyTestTypeWithConstantHash left, KeyTestTypeWithConstantHash right)
-            {
-                return !Equals(left, right);
-            }
-        }
+        private IFixedSizeCache<int, int> _flashCacheShouldCacheSameValues = new FlashCache<int, int>(1);
 
         [Test]
         public void Int32FixedSize()
         {
-            CacheShouldStayFixedSize(i => i - (int.MaxValue / 2));
+            CacheShouldStayFixedSize(i => i - (int.MaxValue/2));
         }
 
         [Test]
@@ -67,13 +27,14 @@ namespace Ruzzie.Caching.Tests
         protected void CacheShouldStayFixedSize<T>(Func<int, T> keyFactory, int? customCacheItemCountToAssert = null)
         {
             IFixedSizeCache<T, byte> cache = CreateCache<T, byte>(1);
-            int numberOfItemsToInsert = cache.MaxItemCount *2;//add twice the items the cache can hold.
-            for (int i = 0; i < numberOfItemsToInsert; i++)
+            int numberOfItemsToInsert = cache.MaxItemCount*2; //add twice the items the cache can hold.
+            for (var i = 0; i < numberOfItemsToInsert; i++)
             {
                 cache.GetOrAdd(keyFactory.Invoke(i), key => 1);
             }
             cache.Trim(TrimOptions.Aggressive);
-            Assert.That(cache.CacheItemCount, Is.LessThanOrEqualTo(customCacheItemCountToAssert ?? cache.MaxItemCount), "Cache size does not seem limited by maxItemCount for: " + typeof(T));
+            Assert.That(cache.CacheItemCount, Is.LessThanOrEqualTo(customCacheItemCountToAssert ?? cache.MaxItemCount),
+                "Cache size does not seem limited by maxItemCount for: " + typeof (T));
         }
 
         [Test]
@@ -109,13 +70,13 @@ namespace Ruzzie.Caching.Tests
         [TestCase(2, 2)]
         [TestCase(10, 10)]
         [TestCase(100, 100)]
-        [TestCase(500, 497)]//misses due to poor hash spreading icm. pow 2
-        [TestCase(1024, 1008)]//misses due to poor hash spreading icm. pow 2
+        [TestCase(500, 497)] //misses due to poor hash spreading icm. pow 2
+        [TestCase(1024, 1008)] //misses due to poor hash spreading icm. pow 2
         public void CacheItemCountShouldReturnOnlyItemsInCache(int numberOfItemsToInsert, int expectedCount)
         {
             IFixedSizeCache<string, Guid> cache = CreateCache<string, Guid>(1);
 
-            for (int i = 0; i < numberOfItemsToInsert; i++)
+            for (var i = 0; i < numberOfItemsToInsert; i++)
             {
                 Guid newGuid = Guid.NewGuid();
                 cache.GetOrAdd(i + "CacheItemCountShouldReturnOnlyItemsInCache", key => newGuid);
@@ -128,13 +89,13 @@ namespace Ruzzie.Caching.Tests
         [TestCase(2, 2)]
         [TestCase(10, 10)]
         [TestCase(100, 100)]
-        [TestCase(500, 489)]//misses due to poor hash spreading icm. pow 2
-        [TestCase(1024, 989)]//misses due to poor hash spreading icm. pow 2
+        [TestCase(500, 489)] //misses due to poor hash spreading icm. pow 2
+        [TestCase(1024, 989)] //misses due to poor hash spreading icm. pow 2
         public void CacheItemCountShouldReturnOnlyItemsInCacheWithGuidAsKey(int numberOfItemsToInsert, int expectedCount)
         {
             IFixedSizeCache<Guid, Guid> cache = CreateCache<Guid, Guid>(1);
 
-            for (int i = 0; i < numberOfItemsToInsert; i++)
+            for (var i = 0; i < numberOfItemsToInsert; i++)
             {
                 Guid newGuid = Guid.NewGuid();
                 cache.GetOrAdd(newGuid, key => newGuid);
@@ -164,8 +125,8 @@ namespace Ruzzie.Caching.Tests
         {
             IFixedSizeCache<KeyTestTypeWithConstantHash, int> flashCache = CreateCache<KeyTestTypeWithConstantHash, int>(1);
 
-            flashCache.GetOrAdd(new KeyTestTypeWithConstantHash { Value = "10" }, i => 10);
-            int value = flashCache.GetOrAdd(new KeyTestTypeWithConstantHash { Value = "99" }, i => 99);
+            flashCache.GetOrAdd(new KeyTestTypeWithConstantHash {Value = "10"}, i => 10);
+            int value = flashCache.GetOrAdd(new KeyTestTypeWithConstantHash {Value = "99"}, i => 99);
 
             Assert.That(value, Is.EqualTo(99));
         }
@@ -180,8 +141,6 @@ namespace Ruzzie.Caching.Tests
 
             Assert.That(value, Is.EqualTo(10));
         }
-
-        private IFixedSizeCache<int, int> _flashCacheShouldCacheSameValues = new FlashCache<int, int>(1);
 
         [TestFixtureSetUp]
         public void FixtureSetUp()
@@ -211,7 +170,7 @@ namespace Ruzzie.Caching.Tests
         }
 
         protected abstract IFixedSizeCache<TKey, TValue> CreateCache<TKey, TValue>(int size, IEqualityComparer<TKey> ordinalIgnoreCase);
-    
+
 
         [Test]
         public void ShouldInitializeWithFixedMaximumSizeToNearestPowerOfTwo()
@@ -236,7 +195,7 @@ namespace Ruzzie.Caching.Tests
         [Test]
         public void ShouldInitializeWithFixedMaximumSizeToNearestPowerOfTwoWhenMaxIntIsGiven()
         {
-            IFixedSizeCache<string, string> cache = CreateCache<string, string>((int.MaxValue) / 2);
+            IFixedSizeCache<string, string> cache = CreateCache<string, string>((int.MaxValue)/2);
 
             Assert.That(cache.MaxItemCount, Is.EqualTo(8388608));
         }
@@ -247,7 +206,7 @@ namespace Ruzzie.Caching.Tests
             var keyOne = "No hammertime for: 19910";
             var keyTwo = "No hammertime for: 90063";
 
-            var cache = CreateCache<string, string>(13);
+            IFixedSizeCache<string, string> cache = CreateCache<string, string>(13);
 
             Assert.That(cache.GetOrAdd(keyOne, s => keyOne), Is.EqualTo(keyOne));
             Assert.That(cache.GetOrAdd(keyTwo, s => keyTwo), Is.EqualTo(keyTwo));
@@ -298,10 +257,10 @@ namespace Ruzzie.Caching.Tests
         public void TryGetShouldReturnFalseForItemWithSameHashcodeAndDifferentValues()
         {
             IFixedSizeCache<KeyTestTypeWithConstantHash, string> cache = CreateCache<KeyTestTypeWithConstantHash, string>(1);
-            cache.GetOrAdd(new KeyTestTypeWithConstantHash { Value = "a" }, hash => "1");
+            cache.GetOrAdd(new KeyTestTypeWithConstantHash {Value = "a"}, hash => "1");
 
             string value;
-            Assert.That(cache.TryGet(new KeyTestTypeWithConstantHash { Value = "b" }, out value), Is.False);
+            Assert.That(cache.TryGet(new KeyTestTypeWithConstantHash {Value = "b"}, out value), Is.False);
         }
 
         [Test]
@@ -309,17 +268,19 @@ namespace Ruzzie.Caching.Tests
         {
             IFixedSizeCache<string, string> cache = CreateCache<string, string>(1);
 
-            Parallel.For(0, cache.MaxItemCount, new ParallelOptions { MaxDegreeOfParallelism = -1 }, i =>
+            Parallel.For(0, cache.MaxItemCount, new ParallelOptions {MaxDegreeOfParallelism = -1}, i =>
             {
                 string key = i.ToString().PadLeft(20, 'C');
 
-                Assert.That(cache.GetOrAdd(key, s => i.ToString()), Is.EqualTo(i.ToString()), "I : " + i + " C:" + cache.CacheItemCount + " Key: " + key);
+                Assert.That(cache.GetOrAdd(key, s => i.ToString()), Is.EqualTo(i.ToString()),
+                    "I : " + i + " C:" + cache.CacheItemCount + " Key: " + key);
                 Assert.That(cache.GetOrAdd("A".PadLeft(20, '1'), s => 42.ToString()), Is.EqualTo(42.ToString()));
             });
 
             cache.Trim(TrimOptions.Aggressive);
             //Cache size should be between The current item count * Effeciency and less than MaxItemCount
-            Assert.That(cache.CacheItemCount,Is.GreaterThanOrEqualTo(cache.MaxItemCount * (MinimalEfficiencyInPercent/100.0)).And.LessThanOrEqualTo(cache.MaxItemCount));
+            Assert.That(cache.CacheItemCount,
+                Is.GreaterThanOrEqualTo(cache.MaxItemCount*(MinimalEfficiencyInPercent/100.0)).And.LessThanOrEqualTo(cache.MaxItemCount));
         }
 
         [Test]
@@ -330,33 +291,24 @@ namespace Ruzzie.Caching.Tests
             IFixedSizeCache<string, byte> cache = null;
 
             //loop the cache size and assert a few times to check for bugs
-            for (int k = 0; k < 10; k++)
+            for (var k = 0; k < 10; k++)
             {
-
                 cache = CreateCache<string, byte>(1, StringComparer.OrdinalIgnoreCase);
                 //first fill cache
-                Parallel.For(0, cache.MaxItemCount, i =>
-                {
-                    cache.GetOrAdd(i.ToString().PadRight(20, 'M'), key => 1);
-                });
+                Parallel.For(0, cache.MaxItemCount, i => { cache.GetOrAdd(i.ToString().PadRight(20, 'M'), key => 1); });
 
                 //Cache size should be between The current item count * Effeciency and less than MaxItemCount
-                Assert.That(cache.CacheItemCount, Is.GreaterThanOrEqualTo(cache.MaxItemCount * (MinimalEfficiencyInPercent / 100.0)).And.LessThanOrEqualTo(cache.MaxItemCount));
+                Assert.That(cache.CacheItemCount,
+                    Is.GreaterThanOrEqualTo(cache.MaxItemCount*(MinimalEfficiencyInPercent/100.0)).And.LessThanOrEqualTo(cache.MaxItemCount));
             }
 
-            bool mustLoop = true;
+            var mustLoop = true;
 
             //write loops
             //Continuously write to the buffer
-            Task writeLoopOne = Task.Run(() =>
-            {
-                WriteToCacheLoop(ref mustLoop, cache);
-            });
+            Task writeLoopOne = Task.Run(() => { WriteToCacheLoop(ref mustLoop, cache); });
 
-            Task writeLoopTwo = Task.Run(() =>
-            {
-                WriteToCacheLoop(ref mustLoop, cache);
-            });
+            Task writeLoopTwo = Task.Run(() => { WriteToCacheLoop(ref mustLoop, cache); });
 
             //Continously aggresivle trim
             Task trimLoop = Task.Run(() =>
@@ -368,7 +320,7 @@ namespace Ruzzie.Caching.Tests
                 }
             });
 
-            
+
             Thread.Sleep(runtimeInMillis);
             mustLoop = false;
             writeLoopOne.Wait();
@@ -379,13 +331,14 @@ namespace Ruzzie.Caching.Tests
             //Cache size should be between The current item count * Effeciency and less than MaxItemCount
             // ReSharper disable once PossibleNullReferenceException
             cache.Trim(TrimOptions.Aggressive);
-            Assert.That(cache.CacheItemCount, Is.GreaterThanOrEqualTo(cache.MaxItemCount * (MinimalEfficiencyInPercent / 100.0)).And.LessThanOrEqualTo(cache.MaxItemCount));
+            Assert.That(cache.CacheItemCount,
+                Is.GreaterThanOrEqualTo(cache.MaxItemCount*(MinimalEfficiencyInPercent/100.0)).And.LessThanOrEqualTo(cache.MaxItemCount));
         }
 
         private static void WriteToCacheLoop(ref bool mustLoop, IFixedSizeCache<string, byte> cache)
         {
             Stopwatch timer = new Stopwatch();
-            int counter = 0;
+            var counter = 0;
             timer.Start();
             while (mustLoop)
             {
@@ -396,31 +349,31 @@ namespace Ruzzie.Caching.Tests
             timer.Stop();
 
             string message = "Total write calls: " + counter;
-            message += "\n" + "Avg timer per write call: " + timer.Elapsed.TotalMilliseconds / counter + " ms.";
-            message += "\n" + "Avg timer per write call: " + (double)(timer.Elapsed.Ticks * 100) / counter + " ns.";
+            message += "\n" + "Avg timer per write call: " + timer.Elapsed.TotalMilliseconds/counter + " ms.";
+            message += "\n" + "Avg timer per write call: " + (double) (timer.Elapsed.Ticks*100)/counter + " ns.";
             Trace.WriteLine(message);
         }
 
-        [Test] 
+        [Test]
         public void MemorySizeApproximationTest()
         {
             IFixedSizeCache<string, int> cache = CreateCache<string, int>(8);
             long before = GC.GetTotalMemory(true);
             GC.KeepAlive(cache);
-            Parallel.For(0, cache.MaxItemCount, new ParallelOptions { MaxDegreeOfParallelism = -1 }, i =>
+            Parallel.For(0, cache.MaxItemCount, new ParallelOptions {MaxDegreeOfParallelism = -1}, i =>
             {
                 string key = i.ToString().PadLeft(20, 'C');
 
-               cache.GetOrAdd(key, s => i);
+                cache.GetOrAdd(key, s => i);
             });
-           
+
             long after = GC.GetTotalMemory(true);
 
             double diff = after - before;
 
-            double effectiveSizeInMb = cache.SizeInMb/100.0 * MinimalEfficiencyInPercent;
+            double effectiveSizeInMb = cache.SizeInMb/100.0*MinimalEfficiencyInPercent;
 
-            Assert.That((diff/1024)/1024, Is.EqualTo(effectiveSizeInMb).Within(1 + ((1/100.0) * (100 - MinimalEfficiencyInPercent))));
+            Assert.That((diff/1024)/1024, Is.EqualTo(effectiveSizeInMb).Within(1 + ((1/100.0)*(100 - MinimalEfficiencyInPercent))));
         }
 
         [Test]
@@ -429,7 +382,7 @@ namespace Ruzzie.Caching.Tests
             IFixedSizeCache<string, int> cache = CreateCache<string, int>(1);
             //overfill cache (that is why we use string, since the hashspreading in pow2 is poor
 
-            for (int i = 0; i < cache.MaxItemCount*2; i++)
+            for (var i = 0; i < cache.MaxItemCount*2; i++)
             {
                 int value = i;
                 cache.GetOrAdd(i.ToString(), key => value);
@@ -437,7 +390,50 @@ namespace Ruzzie.Caching.Tests
 
             cache.Trim(TrimOptions.Aggressive);
 
-            Assert.That(cache.CacheItemCount, Is.GreaterThanOrEqualTo(cache.MaxItemCount * (MinimalEfficiencyInPercent / 100.0)).And.LessThanOrEqualTo(cache.MaxItemCount));
+            Assert.That(cache.CacheItemCount,
+                Is.GreaterThanOrEqualTo(cache.MaxItemCount*(MinimalEfficiencyInPercent/100.0)).And.LessThanOrEqualTo(cache.MaxItemCount));
+        }
+
+        protected class KeyTestTypeWithConstantHash
+        {
+            public string Value;
+
+            public override int GetHashCode()
+            {
+                return 7;
+            }
+
+            protected bool Equals(KeyTestTypeWithConstantHash other)
+            {
+                return string.Equals(Value, other.Value);
+            }
+
+            public override bool Equals(object obj)
+            {
+                if (ReferenceEquals(null, obj))
+                {
+                    return false;
+                }
+                if (ReferenceEquals(this, obj))
+                {
+                    return true;
+                }
+                if (obj.GetType() != GetType())
+                {
+                    return false;
+                }
+                return Equals((KeyTestTypeWithConstantHash) obj);
+            }
+
+            public static bool operator ==(KeyTestTypeWithConstantHash left, KeyTestTypeWithConstantHash right)
+            {
+                return Equals(left, right);
+            }
+
+            public static bool operator !=(KeyTestTypeWithConstantHash left, KeyTestTypeWithConstantHash right)
+            {
+                return !Equals(left, right);
+            }
         }
     }
 }

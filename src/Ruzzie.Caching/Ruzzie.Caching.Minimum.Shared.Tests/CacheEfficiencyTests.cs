@@ -8,9 +8,9 @@ namespace Ruzzie.Caching.Tests
     [Category("CacheEfficiencyTests")]
     public abstract class CacheEfficiencyTests
     {
-        public abstract IFixedSizeCache<TKey, TValue> CreateCache<TKey, TValue>(int size);
+        protected abstract IFixedSizeCache<TKey, TValue> CreateCache<TKey, TValue>(int size);
 
-        public abstract double MinimalEfficiencyInPercent { get; }
+        protected abstract double MinimalEfficiencyInPercent { get; }
 
         [Test]
         public void BooleanEfficiency()

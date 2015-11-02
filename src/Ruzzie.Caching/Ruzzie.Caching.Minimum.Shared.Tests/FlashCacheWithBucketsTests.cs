@@ -105,14 +105,14 @@ namespace Ruzzie.Caching.Tests
             cache.TrimCache(cache.RealCacheItemCount - cache.MaxItemCount);
 
             Assert.That(cache.RealCacheItemCount, Is.EqualTo(cache.MaxItemCount));
-        }      
+        }
 
-        public override IFixedSizeCache<TKey, TValue> CreateCache<TKey, TValue>(int size)
+        protected override IFixedSizeCache<TKey, TValue> CreateCache<TKey, TValue>(int size)
         {
             return new FlashCacheWithBuckets<TKey, TValue>(size);
         }
 
-        public override double MinimalEfficiencyInPercent { get { return 100; } }
+        protected override double MinimalEfficiencyInPercent { get { return 100; } }
 
         protected override IFixedSizeCache<TKey, TValue> CreateCache<TKey, TValue>(int size, IEqualityComparer<TKey> ordinalIgnoreCase)
         {

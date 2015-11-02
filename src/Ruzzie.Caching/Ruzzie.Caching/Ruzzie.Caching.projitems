@@ -17,10 +17,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)IFixedSizeCache.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MemoryCacheWithSizeLimit.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PowerOfTwoHelper.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)PrimeTool.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)PrimeToolHash.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)SizeHelpers.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)TypeExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PrimeHelper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SizeHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TypeHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Volatile.cs" />
   </ItemGroup>
