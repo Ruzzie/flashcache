@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using NUnit.Framework;
 
@@ -58,6 +61,35 @@ namespace Ruzzie.Caching.Tests
         public void ArraySizeTests(object value, int expectedSize)
         {
             Assert.That(TypeHelper.SizeOf(value), Is.EqualTo(expectedSize));
+        }
+        class CustomType
+        {
+            public CustomType(int[] values)
+            {
+                Values = values;
+            }
+
+            public string Name { get; set; }
+            public int[] Values { get; }
+        }
+        [Test]
+        public void CustomTypeSizeTest()
+        {
+            CustomType customType = new CustomType(Enumerable.Range(0,89).ToArray());
+            customType.Name = "12345678901234567890";
+            Assert.That(TypeHelper.SizeOf(typeof(CustomType), customType),Is.EqualTo(480));
+        }
+
+        [Test]
+        public void ArraySizeOfUriTypeTests()
+        {
+            Uri[] uris = new[]
+            {
+                new Uri("http://www.acme1.com/a/a.htm"), new Uri("http://www.acme2.com/a/a.htm"), new Uri("http://www.acme3.com/a/a.htm"),
+                new Uri("http://www.acme4.com/a/a.htm")
+            };
+
+            ArraySizeTests(uris, 1536);
         }
 
         [TestCase(0, 8)]
@@ -219,6 +251,13 @@ namespace Ruzzie.Caching.Tests
         public void GuidTypeSize()
         {
             Assert.That(TypeHelper.SizeOf(new Guid()), Is.EqualTo(16));
+        }
+
+        [Test]
+        public void SizeOfUri()
+        {
+            int sizeInBytes = TypeHelper.SizeOf(typeof(Uri), default(Uri));
+            Assert.That(sizeInBytes, Is.EqualTo(392));
         }
 
         [Test]

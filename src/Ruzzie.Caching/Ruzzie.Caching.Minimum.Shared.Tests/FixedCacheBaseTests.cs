@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using NUnit.Framework;
@@ -355,25 +356,80 @@ namespace Ruzzie.Caching.Tests
         }
 
         [Test]
-        public void MemorySizeApproximationTest()
+        public void MemorySizeApproximationSmokeTest()
         {
-            IFixedSizeCache<string, int> cache = CreateCache<string, int>(8);
-            long before = GC.GetTotalMemory(true);
-            GC.KeepAlive(cache);
-            Parallel.For(0, cache.MaxItemCount, new ParallelOptions {MaxDegreeOfParallelism = -1}, i =>
-            {
-                string key = i.ToString().PadLeft(20, 'C');
+            Random random = new Random();
+            MemorySizeApproximationTest(s => random.Next());          
+        }
 
-                cache.GetOrAdd(key, s => i);
+        [Test]
+        public void MemorySizeApproximationForArrayOfUriTypeValuesTest()
+        {
+            MemorySizeApproximationTest(s =>
+            {
+                Uri[] uris = new Uri[89];
+                for (int j = 0; j < uris.Length; j++)
+                {
+                    uris[j] = new Uri("http://www." + j + ".com/abc/index.htm", UriKind.Absolute);
+                    // ReSharper disable once ReturnValueOfPureMethodIsNotUsed
+                    uris[j].GetComponents(UriComponents.Host, UriFormat.Unescaped);
+                }
+
+                return uris;
+            });                         
+        }
+
+        [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Local")]
+        class CustomTypeForMemTest
+        {
+            public CustomTypeForMemTest(int[] values)
+            {
+                Values = values;
+            }
+
+            public string Name { get; set; }
+            public int[] Values { get; }
+        }
+
+        [Test]
+        public void MemorySizeApproximationForArrayOfCustomTypeValuesTest()
+        {
+            MemorySizeApproximationTest(s =>
+            {
+                CustomTypeForMemTest[] types = new CustomTypeForMemTest[89];
+                for (int j = 0; j < types.Length; j++)
+                {
+                    types[j] = new CustomTypeForMemTest(Enumerable.Range(0, 89).ToArray());
+                    types[j].Name = j.ToString().PadLeft(20, 'C');
+                }
+
+                return types;
+            });          
+        }
+
+        private void MemorySizeApproximationTest<TValue>(Func<string,TValue> valueFactory)
+        {
+            IFixedSizeCache<string, TValue> cache = CreateCache<string, TValue>(8);
+            long before = GC.GetTotalMemory(true);
+
+            Parallel.For(0, cache.MaxItemCount * 2, new ParallelOptions { MaxDegreeOfParallelism = -1 }, i =>
+            {
+                string key = i.ToString().PadRight(20, 'C');
+
+                cache.GetOrAdd(key, valueFactory.Invoke);
             });
+
+            cache.Trim(TrimOptions.Aggressive);
 
             long after = GC.GetTotalMemory(true);
 
             double diff = after - before;
 
-            double effectiveSizeInMb = cache.SizeInMb/100.0*MinimalEfficiencyInPercent;
+            GC.KeepAlive(cache);
+            double actualSizeInMb = (diff / 1024) / 1024;
+            Debug.WriteLine("Cache size was: " + actualSizeInMb.ToString("F") + " Mb Estimated size was: " + cache.SizeInMb + " Desired max size was: 8");
 
-            Assert.That((diff/1024)/1024, Is.EqualTo(effectiveSizeInMb).Within(1 + ((1/100.0)*(100 - MinimalEfficiencyInPercent))));
+            Assert.That(actualSizeInMb, Is.EqualTo(cache.SizeInMb).Within(1 + ((1 / 100.0) * (100 - MinimalEfficiencyInPercent))));
         }
 
         [Test]

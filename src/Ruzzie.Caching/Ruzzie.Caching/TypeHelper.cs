@@ -87,22 +87,24 @@ namespace Ruzzie.Caching
                     return GetStringSize(obj as string);
                 case "System.Guid":
                     return 16;
-            }          
+            }
 
             //no basic types found, decompose fields
+            //Ignore properties, since the have backing fields OR are essentially methods
             FieldInfo[] fieldInfos = t.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly);
           
             for (int i = 0; i < fieldInfos.Length; i++)
             {
                 FieldInfo fieldInfo = fieldInfos[i];
                 object fieldValue;
+             
                 if (obj == null)
                 {
                     fieldValue = null;
                 }
                 else
                 { 
-                    fieldValue = fieldInfo.GetValue(obj);
+                    fieldValue = fieldInfo.GetValue(obj);                   
                 }
 
                 if (fieldInfo.FieldType.IsNested && !fieldInfo.FieldType.IsValueType)//since we cannot resolve 2 way references easily
@@ -183,5 +185,5 @@ namespace Ruzzie.Caching
         }
 
         static readonly bool Is64BitProcess = (IntPtr.Size == 8);
-    }   
+    }    
 }

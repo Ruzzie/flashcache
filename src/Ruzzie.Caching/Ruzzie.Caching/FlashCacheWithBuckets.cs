@@ -36,7 +36,8 @@ namespace Ruzzie.Caching
         ///     Constructor. Creates the FlashCache of a fixed maximumSizeInMb.
         ///     The use is a fixed size cache. Items are NOT guaranteed to be cached forever. Locations will be overwritten based
         ///     on the hashcode.
-        ///     This cache guarantees a fixed size and read and write thread safety.
+        ///     This cache guarantees a fixed size and read and write thread safety. The cache will estimate the probable size of each type in the cache. 
+        ///     The size calculation in general use cases is pessimistic. If you see a big difference in real memory usage and the size of the cache, tune it with the parameters or give a larger size.
         /// </summary>
         /// <param name="maximumSizeInMb">The maximum desired size in MegaBytes of the cache. The cache size will be an approximation of the size in Mb's.</param>
         /// <param name="comparer">Optionally the desired equality comparer to use for comparing keys.</param>
