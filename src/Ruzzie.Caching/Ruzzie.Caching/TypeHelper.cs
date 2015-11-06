@@ -15,6 +15,10 @@ namespace Ruzzie.Caching
         private static readonly int defaultObjectSizeInBytes = 32;//24;//32
         private static readonly int defaultStringLength = 20;
 
+        /// <exception cref="TargetException">In the .NET for Windows Store apps or the Portable Class Library, catch <see cref="T:System.Exception" /> instead.The field is non-static and <paramref name="obj" /> is null. </exception>
+        /// <exception cref="NotSupportedException">A field is marked literal, but the field does not have one of the accepted literal types. </exception>
+        /// <exception cref="FieldAccessException">In the .NET for Windows Store apps or the Portable Class Library, catch the base class exception, <see cref="T:System.MemberAccessException" />, instead.The caller does not have permission to access this field. </exception>
+        /// <exception cref="ArgumentException">The method is neither declared nor inherited by the class of <paramref name="obj" />. </exception>
         internal static int SizeOf<T>(Type t, T obj = default(T))
         {
             int size = 0;
@@ -91,11 +95,11 @@ namespace Ruzzie.Caching
 
             //no basic types found, decompose fields
             //Ignore properties, since the have backing fields OR are essentially methods
-            FieldInfo[] fieldInfos = t.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly);
+            FieldInfo[] allFieldInfos = t.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly);
           
-            for (int i = 0; i < fieldInfos.Length; i++)
+            for (int i = 0; i < allFieldInfos.Length; i++)
             {
-                FieldInfo fieldInfo = fieldInfos[i];
+                FieldInfo fieldInfo = allFieldInfos[i];
                 object fieldValue;
              
                 if (obj == null)
@@ -139,7 +143,7 @@ namespace Ruzzie.Caching
             return (StringOverHead() +  ((stringSize+1) * 2).RoundUpToNearest(IntPtr.Size));         
         }
 
-        static int StringOverHead()
+        private static int StringOverHead()
         {
             if (Is64BitProcess)
             {
@@ -148,7 +152,7 @@ namespace Ruzzie.Caching
             return 20;
         }
 
-        static int ArrayOverHeadValueType() //aproximate
+        private static int ArrayOverHeadValueType() //approximate
         {
             if (Is64BitProcess)
             {
@@ -158,7 +162,7 @@ namespace Ruzzie.Caching
             return 12;
         }
 
-        internal static int ArrayOverHeadReferenceType() //aproximate
+        internal static int ArrayOverHeadReferenceType() //approximate
         {
             if (Is64BitProcess)
             {
@@ -168,7 +172,7 @@ namespace Ruzzie.Caching
             return 16;
         }
 
-        internal static int TypeOverhead(bool is64BitProcess)//aproximate
+        internal static int TypeOverhead(bool is64BitProcess)//approximate
         {
             if (is64BitProcess)
             {

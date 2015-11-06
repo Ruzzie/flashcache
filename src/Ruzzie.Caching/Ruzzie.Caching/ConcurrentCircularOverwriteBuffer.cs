@@ -7,7 +7,7 @@ using System.Threading;
 namespace Ruzzie.Caching
 {
     /// <summary>
-    ///     Cirular buffer that overwrites values when the capacity is reached.
+    ///     Circular buffer that overwrites values when the capacity is reached.
     /// </summary>
     /// <typeparam name="T"></typeparam>
     internal class ConcurrentCircularOverwriteBuffer<T>
@@ -43,6 +43,12 @@ namespace Ruzzie.Caching
             get { return _count; }
         }
 
+        /// <exception cref="ArgumentNullException"><paramref name="array" /> is null.</exception>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="index" /> is less than the lower bound of <paramref name="array" />.</exception>
+        /// <exception cref="ArgumentException"><paramref name="array" /> is multidimensional.-or-The number of elements in the source array is greater than the available number of elements from <paramref name="index" /> to the end of the destination <paramref name="array" />.</exception>
+        /// <exception cref="ArrayTypeMismatchException">The type of the source <see cref="T:System.Array" /> cannot be cast automatically to the type of the destination <paramref name="array" />.</exception>
+        /// <exception cref="RankException">The source array is multidimensional.</exception>
+        /// <exception cref="InvalidCastException">At least one element in the source <see cref="T:System.Array" /> cannot be cast to the type of destination <paramref name="array" />.</exception>
         public void CopyTo(Array array, int index)
         {
             _buffer.CopyTo(array, index);
@@ -67,6 +73,7 @@ namespace Ruzzie.Caching
             }
         }
 
+        /// <exception cref="InvalidOperationException">There is no next value.</exception>
         public T ReadNext()
         {
             T value;
@@ -74,7 +81,7 @@ namespace Ruzzie.Caching
             {
                 return value;
             }
-            throw new Exception("Error there is no next value.");
+            throw new InvalidOperationException("Error there is no next value.");
         }
 
         public bool ReadNext(out T value)
@@ -120,7 +127,6 @@ namespace Ruzzie.Caching
         }
 #else
         [SuppressMessage("ReSharper", "StaticMemberInGenericType")] private static readonly int SpinWaitIterations = 1;
-
         private static void SpinWait()
         {
             Thread.SpinWait(SpinWaitIterations);

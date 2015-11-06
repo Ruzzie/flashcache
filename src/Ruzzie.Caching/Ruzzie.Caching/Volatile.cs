@@ -4,7 +4,7 @@ namespace Ruzzie.Caching
 {
     /// <summary>
     /// Contains methods for performing volatile memory operations.
-    /// For portability reasons this wraps either System.Threading.Volatile or implements Thread.MemoryBarier() on framework versions that do not support that class.
+    /// For portability reasons this wraps either System.Threading.Volatile or implements Thread.MemoryBarrier() on framework versions that do not support that class.
     /// </summary>
     public static class Volatile
     {

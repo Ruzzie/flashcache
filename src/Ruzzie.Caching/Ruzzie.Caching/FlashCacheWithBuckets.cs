@@ -154,6 +154,7 @@ namespace Ruzzie.Caching
         ///     The value. If it was cached the cached value is returned. If it was not cached the value from the value
         ///     factory is returned.
         /// </returns>
+        /// <exception cref="Exception">A delegate callback throws an exception.</exception>
         public TValue GetOrAdd(TKey key, Func<TKey, TValue> valueFactory)
         {
             if (valueFactory == null)
@@ -230,10 +231,7 @@ namespace Ruzzie.Caching
 
         private int GetTargetEntryIndexForHashcode(int hashCode)
         {
-            unchecked
-            {              
-                return (hashCode) & (_indexMask); // bitwise % operator since array is always length in power of 2
-            }
+            return (hashCode) & (_indexMask); // bitwise % operator since array is always length in power of 2
         }
 
         private int GetHashcodeForKey(TKey key)
@@ -435,7 +433,7 @@ namespace Ruzzie.Caching
             hashCode = GetHashcodeForKey(key);
             index = GetTargetEntryIndexForHashcode(hashCode);
    
-            entry = GetFlashEntryWithMemoryBarier(index);
+            entry = GetFlashEntryWithMemoryBarrier(index);
 
             if (entry != null)
             {
@@ -491,7 +489,7 @@ namespace Ruzzie.Caching
             return 0;
         }
 
-        private FlashEntry GetFlashEntryWithMemoryBarier(int index)
+        private FlashEntry GetFlashEntryWithMemoryBarrier(int index)
         {
             return Volatile.Read(ref _entries[index]);
         }

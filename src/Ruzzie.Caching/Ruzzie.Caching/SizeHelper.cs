@@ -56,10 +56,10 @@ namespace Ruzzie.Caching
 
         private static int CalculateSizeWithMinimumOfOneMb(int entryTypeSizeInBytes, long desiredArrayLength)
         {
-            int minumumItemCount = (int) (Constants.OneMbInBytes/entryTypeSizeInBytes);
+            int minimumItemCount = (int) (Constants.OneMbInBytes/entryTypeSizeInBytes);
             int sizeBasedOnDesiredLength = Convert.ToInt32(desiredArrayLength + 2).FindNearestPowerOfTwoEqualOrLessThan();
-            int sizeBasedOnMinumumCount = minumumItemCount.FindNearestPowerOfTwoEqualOrGreaterThan();
-            return Math.Max(sizeBasedOnDesiredLength, sizeBasedOnMinumumCount);
+            int sizeBasedOnMinimumCount = minimumItemCount.FindNearestPowerOfTwoEqualOrGreaterThan();
+            return Math.Max(sizeBasedOnDesiredLength, sizeBasedOnMinimumCount);
         }
     }
 }

@@ -20,6 +20,8 @@ namespace Ruzzie.Caching
         /// Initializes a new instance of the <see cref="MemoryCacheWithSizeLimit{TValue}"/> class.
         /// </summary>
         /// <param name="maxCacheSizeInMb">The maximum cache size in mb.</param>
+        /// <exception cref="ArgumentException">Size cannot be less than one.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">The parameters specify a <see cref="T:System.TimeSpan" /> value less than <see cref="F:System.TimeSpan.MinValue" /> or greater than <see cref="F:System.TimeSpan.MaxValue" />. </exception>
         public MemoryCacheWithSizeLimit(int maxCacheSizeInMb) : this(maxCacheSizeInMb, 300)
         {
         }
@@ -30,6 +32,7 @@ namespace Ruzzie.Caching
         /// <param name="maxCacheSizeInMb">The maximum cache size in mb.</param>
         /// <param name="defaultCacheDurationInSeconds">The default cache duration in seconds.</param>
         /// <exception cref="System.ArgumentException">Size cannot be less than one.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">The parameters specify a <see cref="T:System.TimeSpan" /> value less than <see cref="F:System.TimeSpan.MinValue" /> or greater than <see cref="F:System.TimeSpan.MaxValue" />. </exception>
         public MemoryCacheWithSizeLimit(int maxCacheSizeInMb = 16, int defaultCacheDurationInSeconds = 90)
         {
             if (maxCacheSizeInMb < 1)
@@ -83,6 +86,7 @@ namespace Ruzzie.Caching
         /// <param name="addMethodWhenKeyNotFoundAction">The add method when key not found action.</param>
         /// <returns>The value of the item in cache if found, else the value provided by the add method.</returns>
         /// <exception cref="System.ArgumentNullException">When the key is null.</exception>
+        /// <exception cref="Exception">A delegate callback throws an exception.</exception>
         public TValue GetOrAdd(string key, Func<string, TValue> addMethodWhenKeyNotFoundAction)
         {
 

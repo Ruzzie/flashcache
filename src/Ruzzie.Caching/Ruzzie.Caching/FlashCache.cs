@@ -86,6 +86,7 @@ namespace Ruzzie.Caching
         ///     The value. If it was cached the cached value is returned. If it was not cached the value from the value
         ///     factory is returned.
         /// </returns>
+        /// <exception cref="Exception">A delegate callback throws an exception.</exception>
         public TValue GetOrAdd(TKey key, Func<TKey, TValue> valueFactory)
         {
             if (valueFactory == null)
@@ -96,7 +97,7 @@ namespace Ruzzie.Caching
             int hashCode = GetHashcodeForKey(key);
             int index = GetTargetEntryIndexForHashcode(hashCode);
 
-            FlashEntry entry = GetFlashEntryWithMemoryBarier(index);
+            FlashEntry entry = GetFlashEntryWithMemoryBarrier(index);
 
             if (ReferenceEquals(entry, null) == false && KeyIsEqual(key, entry, hashCode))
             {
@@ -161,7 +162,7 @@ namespace Ruzzie.Caching
             int hashCode = GetHashcodeForKey(cacheKey);
             int index = GetTargetEntryIndexForHashcode(hashCode);
 
-            FlashEntry entry = GetFlashEntryWithMemoryBarier(index);
+            FlashEntry entry = GetFlashEntryWithMemoryBarrier(index);
 
             if (ReferenceEquals(entry, null))
             {
@@ -185,7 +186,7 @@ namespace Ruzzie.Caching
         /// <returns>0</returns>
         public int Trim(TrimOptions trimOptions)
         {
-            return 0; //no trim necesarry with this implementation.
+            return 0; //no trim necessary with this implementation.
         }
 
         internal static int CalculateFlashEntryTypeSize(int averageSizeInBytesOfKey = -1, int averageSizeInBytesOfValue = -1)
@@ -196,7 +197,7 @@ namespace Ruzzie.Caching
             return entryTypeSize;
         }
 
-        private FlashEntry GetFlashEntryWithMemoryBarier(int targetEntry)
+        private FlashEntry GetFlashEntryWithMemoryBarrier(int targetEntry)
         {
             return Volatile.Read(ref _entries[targetEntry]);
         }
@@ -208,10 +209,7 @@ namespace Ruzzie.Caching
 
         private int GetTargetEntryIndexForHashcode(int hashCode)
         {
-            unchecked
-            {
-                return (hashCode) & (_indexMask); // bitwise % operator since array is always length power of 2
-            }
+            return (hashCode) & (_indexMask); // bitwise % operator since array is always length power of 2
         }
 
         private int GetHashcodeForKey(TKey key)
