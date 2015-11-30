@@ -34,9 +34,8 @@ namespace Ruzzie.Caching
         /// <returns>The reference to <typeparamref name="T"/> that was read. This reference is the latest written by any processor in the computer, regardless of the number of processors or the state of processor cache</returns>
         public static T Read<T>(ref T location) where T : class
         {
-
 #if NET40 || PORTABLE
-            var value = location;
+            T value = location;
             System.Threading.Thread.MemoryBarrier();
             return value;
 #else

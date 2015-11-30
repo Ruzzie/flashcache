@@ -68,7 +68,7 @@ namespace Ruzzie.Caching
             InitializeLockArray();
 
             _addedHashCodesRingBuffer = new ConcurrentCircularOverwriteBuffer<int>(_maxItemCount);
-            _trimTimer = new Timer(TrimTimerCallback,this,new TimeSpan(0,0,0, TrimTimerInSeconds), new TimeSpan(0,0,0, TrimTimerInSeconds) );
+            _trimTimer = new Timer(TrimTimerCallback, this, new TimeSpan(0, 0, 0, TrimTimerInSeconds), new TimeSpan(0, 0, 0, TrimTimerInSeconds));
         }
 
         private void InitializeLockArray()
@@ -175,7 +175,7 @@ namespace Ruzzie.Caching
 
             lock (_locks[index])
             {
-                 GetFlashEntryUnsafe(index, ref entry);
+                GetFlashEntryUnsafe(index, ref entry);
 
                 if (entry != null && KeyIsEqual(key, hashCode, entry))
                 {
@@ -246,8 +246,7 @@ namespace Ruzzie.Caching
             _addedHashCodesRingBuffer.WriteNext(hashCode);
 
             if (entry == null)
-            {
-                //"volatile" write of value
+            {               
                 _entries[targetEntryIndex] = entryToInsert;
                 if (_currentItemCount < _maxItemCount)
                 {
@@ -337,8 +336,7 @@ namespace Ruzzie.Caching
                     {
                         FlashEntry currentEntry = entry;
                         FlashEntry previousEntry = null;
-
-                        // ReSharper disable once ConstantConditionalAccessQualifier
+                       
                         while (currentEntry?.Next != null)
                         {
                             previousEntry = currentEntry;

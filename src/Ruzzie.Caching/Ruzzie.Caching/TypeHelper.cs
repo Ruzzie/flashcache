@@ -43,9 +43,8 @@ namespace Ruzzie.Caching
                 }
                
                 if (array == null)
-                {
-                    // ReSharper disable once PossibleNullReferenceException
-                    throw new ArgumentException("Type was not of type Array when determining size but was. " + t.BaseType.FullName, "obj");
+                {                   
+                    throw new ArgumentException("Type was not of type Array when determining size but was. " + t.BaseType?.FullName, "obj");
                 }
 
                 return SizeInMemoryForArray(sizeOfElement, array.Length, elementType.IsValueType);
