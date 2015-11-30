@@ -9,6 +9,7 @@ namespace Ruzzie.Caching
     /// A fixed size cache that uses <see cref="MemoryCache"/> as a backing cache.
     /// </summary>
     /// <typeparam name="TValue">The value to cache</typeparam>
+    [Obsolete("This type will be removed in future versions. Use FlashCacheWithBuckets as replacement")]
     public class MemoryCacheWithSizeLimit<TValue> : IFixedSizeCache<string,TValue>, IDisposable
     {
         private MemoryCache _cache;
