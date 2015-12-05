@@ -23,7 +23,7 @@ namespace Ruzzie.Caching
         private readonly FlashEntry[] _entries;
         private readonly int _sizeInMb;
         private readonly int _maxItemCount;
-        private readonly ConcurrentCircularOverwriteBuffer<int> _addedHashCodesRingBuffer;
+        private readonly ConcurrentCircularOverwriteBuffer<int> _addedHashcodesRingBuffer;
 
         private readonly Timer _trimTimer;
 
@@ -67,7 +67,7 @@ namespace Ruzzie.Caching
             _locks = new object[_maxItemCount];
             InitializeLockArray();
 
-            _addedHashCodesRingBuffer = new ConcurrentCircularOverwriteBuffer<int>(_maxItemCount);
+            _addedHashcodesRingBuffer = new ConcurrentCircularOverwriteBuffer<int>(_maxItemCount);
             _trimTimer = new Timer(TrimTimerCallback, this, new TimeSpan(0, 0, 0, TrimTimerInSeconds), new TimeSpan(0, 0, 0, TrimTimerInSeconds));
         }
 
@@ -243,7 +243,7 @@ namespace Ruzzie.Caching
         private void InsertEntry(TKey key, int hashCode, TValue value, int targetEntryIndex, ref FlashEntry entryToAddTo, ref FlashEntry entry)
         {
             FlashEntry entryToInsert = new FlashEntry(hashCode, key, value);
-            _addedHashCodesRingBuffer.WriteNext(hashCode);
+            _addedHashcodesRingBuffer.WriteNext(hashCode);
 
             if (entry == null)
             {               
@@ -312,7 +312,7 @@ namespace Ruzzie.Caching
             while (trimCount < trimSize)
             {
                 int hashCode;
-                if (!_addedHashCodesRingBuffer.ReadNext(out hashCode))
+                if (!_addedHashcodesRingBuffer.ReadNext(out hashCode))
                 {
                     if (options == TrimOptions.Aggressive)
                     {

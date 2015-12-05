@@ -32,7 +32,7 @@ namespace Ruzzie.Caching
             }
             _capacity = capacity.FindNearestPowerOfTwoEqualOrGreaterThan();
             _buffer = new T[_capacity];
-            _indexMask = (_capacity - 1);
+            _indexMask = _capacity - 1;
 
             _writeHeader = _indexMask;
             _readHeader = _indexMask;
@@ -44,11 +44,24 @@ namespace Ruzzie.Caching
         }
 
         /// <exception cref="ArgumentNullException"><paramref name="array" /> is null.</exception>
-        /// <exception cref="ArgumentOutOfRangeException"><paramref name="index" /> is less than the lower bound of <paramref name="array" />.</exception>
-        /// <exception cref="ArgumentException"><paramref name="array" /> is multidimensional.-or-The number of elements in the source array is greater than the available number of elements from <paramref name="index" /> to the end of the destination <paramref name="array" />.</exception>
-        /// <exception cref="ArrayTypeMismatchException">The type of the source <see cref="T:System.Array" /> cannot be cast automatically to the type of the destination <paramref name="array" />.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">
+        ///     <paramref name="index" /> is less than the lower bound of
+        ///     <paramref name="array" />.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        ///     <paramref name="array" /> is multidimensional.-or-The number of elements in the
+        ///     source array is greater than the available number of elements from <paramref name="index" /> to the end of the
+        ///     destination <paramref name="array" />.
+        /// </exception>
+        /// <exception cref="ArrayTypeMismatchException">
+        ///     The type of the source <see cref="T:System.Array" /> cannot be cast
+        ///     automatically to the type of the destination <paramref name="array" />.
+        /// </exception>
         /// <exception cref="RankException">The source array is multidimensional.</exception>
-        /// <exception cref="InvalidCastException">At least one element in the source <see cref="T:System.Array" /> cannot be cast to the type of destination <paramref name="array" />.</exception>
+        /// <exception cref="InvalidCastException">
+        ///     At least one element in the source <see cref="T:System.Array" /> cannot be cast
+        ///     to the type of destination <paramref name="array" />.
+        /// </exception>
         public void CopyTo(Array array, int index)
         {
             _buffer.CopyTo(array, index);
@@ -58,8 +71,7 @@ namespace Ruzzie.Caching
         {
             int writeHeaderLocal = _writeHeader;
 
-            while (Interlocked.CompareExchange(ref _writeHeader, NextWriteIndex(writeHeaderLocal, _indexMask), writeHeaderLocal) !=
-                   writeHeaderLocal)
+            while (Interlocked.CompareExchange(ref _writeHeader, NextIndex(writeHeaderLocal), writeHeaderLocal) != writeHeaderLocal)
             {
                 SpinWait();
                 writeHeaderLocal = _writeHeader;
@@ -94,12 +106,12 @@ namespace Ruzzie.Caching
 
             int readHeaderLocal = _readHeader;
 
-            while (Interlocked.CompareExchange(ref _readHeader, NextReadIndex(readHeaderLocal, _indexMask), readHeaderLocal) !=
-                   readHeaderLocal)
+            while (Interlocked.CompareExchange(ref _readHeader, NextIndex(readHeaderLocal), readHeaderLocal) != readHeaderLocal)
             {
                 SpinWait();
                 readHeaderLocal = _readHeader;
             }
+
             value = _buffer[readHeaderLocal];
 
             Interlocked.Decrement(ref _count);
@@ -107,14 +119,9 @@ namespace Ruzzie.Caching
             return true;
         }
 
-        private static int NextReadIndex(int currentHeader, int indexMask)
+        private int NextIndex(int currentHeader)
         {
-            return (currentHeader + 1) & (indexMask);
-        }
-
-        private static int NextWriteIndex(int currentHeader, int indexMask)
-        {
-            return (currentHeader + 1) & (indexMask);
+            return (currentHeader + 1) & (_indexMask);
         }
 
 #if PORTABLE
@@ -127,6 +134,7 @@ namespace Ruzzie.Caching
         }
 #else
         [SuppressMessage("ReSharper", "StaticMemberInGenericType")] private static readonly int SpinWaitIterations = 1;
+
         private static void SpinWait()
         {
             Thread.SpinWait(SpinWaitIterations);

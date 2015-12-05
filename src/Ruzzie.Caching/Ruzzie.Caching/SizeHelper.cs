@@ -21,7 +21,7 @@ namespace Ruzzie.Caching
                 return multiple;
             }
 
-            return ((number - 1) | multiple-1) + 1;
+            return ((number - 1) | multiple - 1) + 1;
         }
 
         internal static int CalculateActualSizeInBytesForType(int totalSizeInBytesOfItemsInType, bool is64Bit, bool isValueType  = false)
@@ -40,18 +40,18 @@ namespace Ruzzie.Caching
             return Math.Max(actualSize, typeSize);
         }
 
-        internal static int CalculateMaxItemCountInPowerOfTwo(int maximumSizeInMb, int entryTypeSizeInBytes)
+        internal static int CalculateMaxItemCountInPowerOfTwo(int maximumSizeInMb, int itemSizeInBytes)
         {
-            long probableMaxArrayLength = (Constants.TwoGbInBytes - TypeHelper.ArrayOverHeadReferenceType()) / (entryTypeSizeInBytes);
+            long probableMaxArrayLength = (Constants.TwoGbInBytes - TypeHelper.ArrayOverHeadReferenceType()) / (itemSizeInBytes);
 
-            long desiredArrayLength = ((maximumSizeInMb * (1024L) * (1024L)) / entryTypeSizeInBytes);
+            long desiredArrayLength = ((maximumSizeInMb * (1024L) * (1024L)) / itemSizeInBytes);
 
             if (desiredArrayLength > probableMaxArrayLength)
             {
                 return Convert.ToInt32(probableMaxArrayLength).FindNearestPowerOfTwoEqualOrLessThan();
             }
 
-            return CalculateSizeWithMinimumOfOneMb(entryTypeSizeInBytes, desiredArrayLength);
+            return CalculateSizeWithMinimumOfOneMb(itemSizeInBytes, desiredArrayLength);
         }
 
         private static int CalculateSizeWithMinimumOfOneMb(int entryTypeSizeInBytes, long desiredArrayLength)
