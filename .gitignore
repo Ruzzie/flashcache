@@ -184,3 +184,4 @@ FakesAssemblies/
 *.DotSettings
 
 src/Ruzzie.Caching/Ruzzie.Caching/nuget.exe
+nuget.exe

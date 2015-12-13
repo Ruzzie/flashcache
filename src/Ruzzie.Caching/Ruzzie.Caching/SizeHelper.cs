@@ -1,4 +1,5 @@
 ﻿using System;
+using Ruzzie.Common.Numerics;
 
 namespace Ruzzie.Caching
 {

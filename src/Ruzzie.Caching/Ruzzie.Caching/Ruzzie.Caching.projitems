@@ -16,8 +16,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)FlashCacheWithBuckets.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IFixedSizeCache.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MemoryCacheWithSizeLimit.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)PowerOfTwoHelper.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)PrimeHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SizeHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TypeHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Volatile.cs" />

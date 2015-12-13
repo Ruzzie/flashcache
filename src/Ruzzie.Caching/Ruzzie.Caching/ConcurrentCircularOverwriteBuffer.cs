@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
+using Ruzzie.Common.Numerics;
 
 #pragma warning disable 420
 
