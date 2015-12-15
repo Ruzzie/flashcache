@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using Ruzzie.Common.Collections;
 #if !PORTABLE
 using System.Threading.Tasks;
 #endif
@@ -489,7 +490,7 @@ namespace Ruzzie.Caching
 
         private FlashEntry GetFlashEntryWithMemoryBarrier(int index)
         {
-            return Volatile.Read(ref _entries[index]);
+            return Common.Threading.Volatile.Read(ref _entries[index]);
         }
 
         private class FlashEntry

@@ -10,7 +10,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)AssemblyInfo.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)ConcurrentCircularOverwriteBuffer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Constants.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FlashCache.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FlashCacheWithBuckets.cs" />
@@ -18,6 +17,5 @@
     <Compile Include="$(MSBuildThisFileDirectory)MemoryCacheWithSizeLimit.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SizeHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TypeHelper.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Volatile.cs" />
   </ItemGroup>
 </Project>

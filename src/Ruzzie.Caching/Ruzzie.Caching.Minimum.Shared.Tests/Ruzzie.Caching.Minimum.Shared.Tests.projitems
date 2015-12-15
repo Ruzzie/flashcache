@@ -10,7 +10,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)CacheEfficiencyTests.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)ConcurrentCircularOverwriteBufferTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FixedCacheBaseTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FlashCacheTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FlashCacheWithBucketsTests.cs" />
