@@ -55,6 +55,7 @@ namespace Ruzzie.Caching.Tests
             FlashCacheWithBuckets<int, int> cache = new FlashCacheWithBuckets<int, int>(1);
             Random random = new Random();
             int numberOfHashcodesToUse = 8192;
+            bool shouldWait = Environment.ProcessorCount > 1;
 
             //Generate values that would refer to the same index, but with different hashcodes
             int[] hashCodesThatWouldReferToSameIndexArray = new int[numberOfHashcodesToUse];
@@ -74,8 +75,11 @@ namespace Ruzzie.Caching.Tests
             {
                 cache.GetOrAdd(hashCodesThatWouldReferToSameIndexArray[i], key =>
                 {
-                    //Force a little bit of duration
-                    Thread.SpinWait(random.Next(64,1024));
+                    if (shouldWait)
+                    {
+                        //Force a little bit of duration
+                        Thread.SpinWait(random.Next(64, 1024));
+                    }
                     return key;
                 });
             });

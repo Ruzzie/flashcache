@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
-using Ruzzie.Caching;
 
 namespace Ruzzie.Caching.Tests
 {

@@ -36,6 +36,7 @@ namespace Ruzzie.Caching.Tests
             cache.Trim(TrimOptions.Aggressive);
             Assert.That(cache.CacheItemCount, Is.LessThanOrEqualTo(customCacheItemCountToAssert ?? cache.MaxItemCount),
                 "Cache size does not seem limited by maxItemCount for: " + typeof (T));
+            (cache as IDisposable)?.Dispose();
         }
 
         [Test]
@@ -84,6 +85,7 @@ namespace Ruzzie.Caching.Tests
             }
             Debug.WriteLine(cache.MaxItemCount.ToString());
             Assert.That(cache.CacheItemCount, Is.GreaterThanOrEqualTo(expectedCount));
+            (cache as IDisposable)?.Dispose();
         }
 
         [TestCase(1, 1)]
@@ -103,6 +105,7 @@ namespace Ruzzie.Caching.Tests
             }
             Debug.WriteLine(cache.MaxItemCount.ToString());
             Assert.That(cache.CacheItemCount, Is.GreaterThanOrEqualTo(expectedCount));
+            (cache as IDisposable)?.Dispose();
         }
 
         [Test]
@@ -167,7 +170,8 @@ namespace Ruzzie.Caching.Tests
         public void ShouldInitializeWithComparer()
         {
             // ReSharper disable once ObjectCreationAsStatement
-            CreateCache<string, string>(10, StringComparer.OrdinalIgnoreCase);
+            IFixedSizeCache<string, string> cache = CreateCache<string, string>(10, StringComparer.OrdinalIgnoreCase);
+            (cache as IDisposable)?.Dispose();
         }
 
         protected abstract IFixedSizeCache<TKey, TValue> CreateCache<TKey, TValue>(int size, IEqualityComparer<TKey> ordinalIgnoreCase);
@@ -179,19 +183,20 @@ namespace Ruzzie.Caching.Tests
             IFixedSizeCache<string, string> cache = CreateCache<string, string>(1024);
 
             Assert.That(cache.MaxItemCount, Is.EqualTo(4194304));
+            (cache as IDisposable)?.Dispose();
         }
 
         [TestCase(1)]
         [TestCase(20)]
         [TestCase(100)]
-        [TestCase(5212)]
+        [TestCase(512)]
         public void MaxMbShouldBeLessOrEqualToGivenMaxMb(int givenMax)
         {
             IFixedSizeCache<string, string> cache = CreateCache<string, string>(givenMax);
 
             Assert.That(cache.SizeInMb, Is.LessThanOrEqualTo(givenMax));
+            (cache as IDisposable)?.Dispose();
         }
-
 
         [Test]
         public void ShouldInitializeWithFixedMaximumSizeToNearestPowerOfTwoWhenMaxIntIsGiven()
@@ -199,6 +204,7 @@ namespace Ruzzie.Caching.Tests
             IFixedSizeCache<string, string> cache = CreateCache<string, string>((int.MaxValue)/2);
 
             Assert.That(cache.MaxItemCount, Is.EqualTo(8388608));
+            (cache as IDisposable)?.Dispose();
         }
 
         [Test]
@@ -231,6 +237,7 @@ namespace Ruzzie.Caching.Tests
             cache.GetOrAdd("1", s => 1);
             int value;
             cache.TryGet("1", out value);
+
             Assert.That(value, Is.EqualTo(1));
         }
 
@@ -251,6 +258,7 @@ namespace Ruzzie.Caching.Tests
 
             int value;
             cache.TryGet("1", out value);
+
             Assert.That(value, Is.EqualTo(0));
         }
 
@@ -268,20 +276,20 @@ namespace Ruzzie.Caching.Tests
         public void MultiThreadedReadWriteTest()
         {
             IFixedSizeCache<string, string> cache = CreateCache<string, string>(1);
+            int maxItemCount = cache.MaxItemCount;
 
-            Parallel.For(0, cache.MaxItemCount, new ParallelOptions {MaxDegreeOfParallelism = -1}, i =>
+            Parallel.For(0, maxItemCount, new ParallelOptions {MaxDegreeOfParallelism = -1}, i =>
             {
                 string key = i.ToString().PadLeft(20, 'C');
 
-                Assert.That(cache.GetOrAdd(key, s => i.ToString()), Is.EqualTo(i.ToString()),
-                    "I : " + i + " C:" + cache.CacheItemCount + " Key: " + key);
+                Assert.That(cache.GetOrAdd(key, s => i.ToString()), Is.EqualTo(i.ToString()));
                 Assert.That(cache.GetOrAdd("A".PadLeft(20, '1'), s => 42.ToString()), Is.EqualTo(42.ToString()));
             });
 
             cache.Trim(TrimOptions.Aggressive);
-            //Cache size should be between The current item count * Effeciency and less than MaxItemCount
+            //Cache size should be between The current item count * Efficiency and less than MaxItemCount
             Assert.That(cache.CacheItemCount,
-                Is.GreaterThanOrEqualTo(cache.MaxItemCount*(MinimalEfficiencyInPercent/100.0)).And.LessThanOrEqualTo(cache.MaxItemCount));
+                Is.GreaterThanOrEqualTo(maxItemCount*(MinimalEfficiencyInPercent/100.0)).And.LessThanOrEqualTo(maxItemCount));
         }
 
         [Test]
@@ -298,7 +306,7 @@ namespace Ruzzie.Caching.Tests
                 //first fill cache
                 Parallel.For(0, cache.MaxItemCount, i => { cache.GetOrAdd(i.ToString().PadRight(20, 'M'), key => 1); });
 
-                //Cache size should be between The current item count * Effeciency and less than MaxItemCount
+                //Cache size should be between The current item count * Efficiency and less than MaxItemCount
                 Assert.That(cache.CacheItemCount,
                     Is.GreaterThanOrEqualTo(cache.MaxItemCount*(MinimalEfficiencyInPercent/100.0)).And.LessThanOrEqualTo(cache.MaxItemCount));
             }
@@ -311,7 +319,7 @@ namespace Ruzzie.Caching.Tests
 
             Task writeLoopTwo = Task.Run(() => { WriteToCacheLoop(ref mustLoop, cache); });
 
-            //Continously aggresivle trim
+            //Continuously aggressively trim
             Task trimLoop = Task.Run(() =>
             {
                 while (mustLoop)
@@ -321,7 +329,6 @@ namespace Ruzzie.Caching.Tests
                 }
             });
 
-
             Thread.Sleep(runtimeInMillis);
             mustLoop = false;
             writeLoopOne.Wait();
@@ -329,9 +336,10 @@ namespace Ruzzie.Caching.Tests
             trimLoop.Wait();
             //no exception should have occurred. and the size should be fixed
 
-            //Cache size should be between The current item count * Effeciency and less than MaxItemCount
+            //Cache size should be between The current item count * Efficiency and less than MaxItemCount
             // ReSharper disable once PossibleNullReferenceException
             cache.Trim(TrimOptions.Aggressive);
+          
             Assert.That(cache.CacheItemCount,
                 Is.GreaterThanOrEqualTo(cache.MaxItemCount*(MinimalEfficiencyInPercent/100.0)).And.LessThanOrEqualTo(cache.MaxItemCount));
         }
