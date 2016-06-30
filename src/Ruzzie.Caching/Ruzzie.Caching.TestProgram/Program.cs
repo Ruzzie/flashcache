@@ -5,12 +5,13 @@ using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 using Ruzzie.Caching.Tests;
+using Ruzzie.Common;
 
 namespace Ruzzie.Caching.TestProgram
 {
     class Program
     {
-        private static Random _random = new Random(Environment.TickCount);
+        private static readonly Random Random = new SimpleRandom(Environment.TickCount);
 
         [SuppressMessage("ReSharper", "AccessToModifiedClosure")]
         private static void Main()
@@ -48,7 +49,7 @@ namespace Ruzzie.Caching.TestProgram
                 IFixedSizeCache<string,Item> cache = new FlashCacheWithBuckets<string, Item>(512,StringComparer.OrdinalIgnoreCase);
                 long startMemory = GC.GetTotalMemory(true);
                 GC.KeepAlive(cache);
-                Console.WriteLine("Cache testing with MaxItemCount: "+cache.MaxItemCount);
+                Console.WriteLine("\nCache testing with MaxItemCount: "+cache.MaxItemCount);
                 //prefill the cache for half
                 for (int i = 0; i < cache.MaxItemCount / 2; i++)
                 {
@@ -117,7 +118,7 @@ namespace Ruzzie.Caching.TestProgram
 
                 double diff = after - startMemory;
 
-                Console.WriteLine("Done Cache testing with MaxItemCount: " + cache.MaxItemCount + " items in cache: " + cache.CacheItemCount + " estimated size of cache memory is: "+ (diff / 1024) / 1024+" Mb");
+                Console.WriteLine("\nDone Cache testing with MaxItemCount: " + cache.MaxItemCount + " items in cache: " + cache.CacheItemCount + " estimated size of cache memory is: "+ (diff / 1024) / 1024+" Mb");
 
             }
             catch (Exception e)
@@ -140,7 +141,7 @@ namespace Ruzzie.Caching.TestProgram
                 //_random.NextBytes(charBuffer);
                 //string key = Encoding.Unicode.GetString(charBuffer).ToLowerInvariant();                
 
-                string key = (Guid.NewGuid().ToString()).PadLeft(_random.Next(40), (char)_random.Next(256));
+                string key = (Guid.NewGuid().ToString()).PadLeft(Random.Next(40), (char)Random.Next(256));
                 //Console.WriteLine(key);
                 timer.Restart();
                 // ReSharper disable once PossibleNullReferenceException      
