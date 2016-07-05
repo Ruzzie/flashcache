@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using NUnit.Framework;
 
@@ -8,7 +9,7 @@ namespace Ruzzie.Caching.Tests
     [Category("CacheEfficiencyTests")]
     public abstract class CacheEfficiencyTests
     {
-        protected abstract IFixedSizeCache<TKey, TValue> CreateCache<TKey, TValue>(int size);
+        protected abstract IFixedSizeCache<TKey, TValue> CreateCache<TKey, TValue>(int size, IEqualityComparer<TKey> comparer = null);
 
         protected abstract double MinimalEfficiencyInPercent { get; }
 
@@ -100,7 +101,7 @@ namespace Ruzzie.Caching.Tests
         [Test]
         public void StringEfficiency()
         {
-            CacheEfficiencyShouldBe<string>(i => i.ToString().PadLeft(20, '0'));
+            CacheEfficiencyShouldBe<string>(i => i.ToString().PadLeft(20, '0'), comparer: new StringComparerOrdinalIgnoreCaseFNV1AHash());
         }
 
         [Test]
@@ -115,9 +116,9 @@ namespace Ruzzie.Caching.Tests
             CacheEfficiencyShouldBe<TimeSpan>(i => TimeSpan.FromSeconds(i + i * i));
         }
 
-        public void CacheEfficiencyShouldBe<T>(Func<int, T> keyFactory, int? customCacheItemCountToAssert = null)
+        public void CacheEfficiencyShouldBe<T>(Func<int, T> keyFactory, int? customCacheItemCountToAssert = null, IEqualityComparer<T> comparer = null)
         {
-            IFixedSizeCache<T, byte> cache = CreateCache<T, byte>(1);
+            IFixedSizeCache<T, byte> cache = CreateCache<T, byte>(1, comparer);
             int numberOfItemsToInsert = cache.MaxItemCount;
             for (int i = 0; i < numberOfItemsToInsert; i++)
             {
@@ -126,6 +127,7 @@ namespace Ruzzie.Caching.Tests
 
             double efficiency = ((double)cache.CacheItemCount / cache.MaxItemCount) * 100.0;
 
+            Console.WriteLine("Cache efficiency is: "+efficiency);
             if (customCacheItemCountToAssert != null)
             {
                 Assert.That(cache.CacheItemCount, Is.EqualTo(customCacheItemCountToAssert),

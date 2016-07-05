@@ -13,9 +13,11 @@
     <Compile Include="$(MSBuildThisFileDirectory)Constants.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FlashCache.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FlashCacheWithBuckets.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FNV1aHashAlgorithm.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IFixedSizeCache.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)MemoryCacheWithSizeLimit.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IFlashCacheHashAlgorithm.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SizeHelper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)StringComparerOrdinalIgnoreCaseFNV1AHash.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TypeHelper.cs" />
   </ItemGroup>
 </Project>

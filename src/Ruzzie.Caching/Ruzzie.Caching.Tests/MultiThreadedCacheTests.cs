@@ -9,13 +9,7 @@ namespace Ruzzie.Caching.Tests
 {
     [TestFixture]
     public class MultiThreadedCacheTests
-    {       
-        [Test]
-        public void MemoryCacheWithSizeLimitMultiThreadedTest()
-        {
-            MultiThreadPerformanceTest(new MemoryCacheWithSizeLimit<int>(4), 50000);
-        }
-
+    {             
         [Test]
         public void FlashCacheMultiThreadedTest()
         {
@@ -23,9 +17,21 @@ namespace Ruzzie.Caching.Tests
         }
 
         [Test]
+        public void FlashCacheWithFNVHashMultiThreadedTest()
+        {
+            MultiThreadPerformanceTest(new FlashCache<string, int>(4, new StringComparerOrdinalIgnoreCaseFNV1AHash(), 8), 50000);
+        }
+
+        [Test]
         public void FlashCacheWithBucketsMultiThreadedTest()
         {
             MultiThreadPerformanceTest(new FlashCacheWithBuckets<string, int>(4, StringComparer.OrdinalIgnoreCase, 8), 50000);
+        }
+
+        [Test]
+        public void FlashCacheWithBucketseWithFNVHashMultiThreadedTest()
+        {
+            MultiThreadPerformanceTest(new FlashCacheWithBuckets<string, int>(4, new StringComparerOrdinalIgnoreCaseFNV1AHash(), 8), 50000);
         }
 
         private static void MultiThreadPerformanceTest(IFixedSizeCache<string, int> cache, int loopCount)

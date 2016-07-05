@@ -13,6 +13,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)FixedCacheBaseTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FlashCacheTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FlashCacheWithBucketsTests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FNV1aHashAlgorithmTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Histogram.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TypeHelperTests.cs" />
   </ItemGroup>

@@ -46,7 +46,7 @@ namespace Ruzzie.Caching.TestProgram
 
           
                 //Run a task where the performance should not degrade significantly over time
-                IFixedSizeCache<string,Item> cache = new FlashCacheWithBuckets<string, Item>(512,StringComparer.OrdinalIgnoreCase);
+                IFixedSizeCache<string,Item> cache = new FlashCacheWithBuckets<string, Item>(512,new StringComparerOrdinalIgnoreCaseFNV1AHash());
                 long startMemory = GC.GetTotalMemory(true);
                 GC.KeepAlive(cache);
                 Console.WriteLine("\nCache testing with MaxItemCount: "+cache.MaxItemCount);

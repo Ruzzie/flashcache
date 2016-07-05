@@ -61,7 +61,6 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MemoryCacheWithSizeLimitTests.cs" />
     <Compile Include="MultiThreadedCacheTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

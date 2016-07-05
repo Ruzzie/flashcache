@@ -158,16 +158,11 @@ namespace Ruzzie.Caching.Tests
             Assert.That(()=> cache.Dispose(), Throws.Nothing);
         }
 
-        protected override IFixedSizeCache<TKey, TValue> CreateCache<TKey, TValue>(int size)
-        {
-            return new FlashCacheWithBuckets<TKey, TValue>(size);
-        }
-
         protected override double MinimalEfficiencyInPercent { get { return 100; } }
 
-        protected override IFixedSizeCache<TKey, TValue> CreateCache<TKey, TValue>(int size, IEqualityComparer<TKey> ordinalIgnoreCase)
+        protected override IFixedSizeCache<TKey, TValue> CreateCache<TKey, TValue>(int size, IEqualityComparer<TKey> equalityComparer = null)
         {
-            return new FlashCacheWithBuckets<TKey, TValue>(size,ordinalIgnoreCase);
+            return new FlashCacheWithBuckets<TKey, TValue>(size,equalityComparer);
         }
     }
 }

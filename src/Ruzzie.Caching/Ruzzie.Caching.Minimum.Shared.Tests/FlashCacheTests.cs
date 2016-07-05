@@ -6,16 +6,12 @@ namespace Ruzzie.Caching.Tests
     [TestFixture]
     public class FlashCacheTests : FixedCacheBaseTests
     {
-        protected override IFixedSizeCache<TKey, TValue>  CreateCache<TKey, TValue>(int size)
-        {
-            return new FlashCache<TKey, TValue>(size);
-        }
-
+      
         protected override double MinimalEfficiencyInPercent { get { return 46; } }
 
-        protected override IFixedSizeCache<TKey, TValue> CreateCache<TKey, TValue>(int size, IEqualityComparer<TKey> ordinalIgnoreCase)
+        protected override IFixedSizeCache<TKey, TValue> CreateCache<TKey, TValue>(int size, IEqualityComparer<TKey> equalityComparer = null)
         {
-            return new FlashCache<TKey, TValue>(size, ordinalIgnoreCase);
+            return new FlashCache<TKey, TValue>(size, equalityComparer);
         }
               
         [Test]

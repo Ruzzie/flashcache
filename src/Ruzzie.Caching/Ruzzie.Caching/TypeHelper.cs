@@ -11,15 +11,17 @@ namespace Ruzzie.Caching
             return SizeOf(obj.GetType(),obj);
         }
 
-        static readonly int defaultCollectionSizeWhenDefault = 89;
+        private static readonly int defaultCollectionSizeWhenDefault = 89;
         private static readonly int defaultObjectSizeInBytes = 32;//24;//32
         private static readonly int defaultStringLength = 20;
 
+#pragma warning disable CS1574 // XML comment has cref attribute that could not be resolved
         /// <exception cref="TargetException">In the .NET for Windows Store apps or the Portable Class Library, catch <see cref="T:System.Exception" /> instead.The field is non-static and <paramref name="obj" /> is null. </exception>
-        /// <exception cref="NotSupportedException">A field is marked literal, but the field does not have one of the accepted literal types. </exception>
         /// <exception cref="FieldAccessException">In the .NET for Windows Store apps or the Portable Class Library, catch the base class exception, <see cref="T:System.MemberAccessException" />, instead.The caller does not have permission to access this field. </exception>
+        /// <exception cref="NotSupportedException">A field is marked literal, but the field does not have one of the accepted literal types. </exception>
         /// <exception cref="ArgumentException">The method is neither declared nor inherited by the class of <paramref name="obj" />. </exception>
         internal static int SizeOf<T>(Type t, T obj = default(T))
+#pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
         {
             int size = 0;
             string typeName = t.FullName;
