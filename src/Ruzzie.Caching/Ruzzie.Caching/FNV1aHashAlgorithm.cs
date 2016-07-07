@@ -9,6 +9,7 @@ namespace Ruzzie.Caching
     /// </summary>
     public class FNV1AHashAlgorithm : IFlashCacheHashAlgorithm
     {
+        private static readonly TextInfo InvariantTextInfo = CultureInfo.InvariantCulture.TextInfo;
         const uint FNVPrime32 = 16777619;
         const uint FNVOffsetBasis32 = 2166136261;
 
@@ -66,7 +67,7 @@ namespace Ruzzie.Caching
             uint hash = FNVOffsetBasis32;
             for (int i = 0; i < stringToHash.Length; ++i)
             {
-                ushort currChar = CultureInfo.InvariantCulture.TextInfo.ToUpper(stringToHash[i]);
+                ushort currChar = InvariantTextInfo.ToUpper(stringToHash[i]);
                 byte byteOne = (byte) currChar;              
                 byte byteTwo = (byte) (currChar >> 8);
 
