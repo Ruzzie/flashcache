@@ -8,9 +8,9 @@
         /// <summary>
         /// Hashes the bytes.
         /// </summary>
-        /// <param name="getBytes">The bytes t0 hash.</param>
+        /// <param name="bytesToHash">The bytes t0 hash.</param>
         /// <returns>a hashcode</returns>
-        int HashBytes(byte[] getBytes);
+        int HashBytes(byte[] bytesToHash);
         /// <summary>
         /// Hashes a string, case insensitive.
         /// </summary>

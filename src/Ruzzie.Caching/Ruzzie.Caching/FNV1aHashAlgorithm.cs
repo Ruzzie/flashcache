@@ -16,17 +16,17 @@ namespace Ruzzie.Caching
         /// <summary>
         /// Hashes the bytes.
         /// </summary>
-        /// <param name="getBytes">The get bytes.</param>
+        /// <param name="bytesToHash">The get bytes.</param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">if the bytes are null</exception>
-        public int HashBytes(byte[] getBytes)
+        public int HashBytes(byte[] bytesToHash)
         {
-            if (getBytes == null)
+            if (bytesToHash == null)
             {
-                throw new ArgumentNullException(nameof(getBytes));
+                throw new ArgumentNullException(nameof(bytesToHash));
             }
 
-            return HashBytesInternal(getBytes);
+            return HashBytesInternal(bytesToHash);
         }
 
         /// <summary>
@@ -49,7 +49,6 @@ namespace Ruzzie.Caching
 #endif
         private static int HashBytesInternal(byte[] getBytes)
         {
-          
             uint hash = FNVOffsetBasis32;
 
             for (int i = 0; i < getBytes.Length; ++i)
@@ -68,8 +67,8 @@ namespace Ruzzie.Caching
             for (int i = 0; i < stringToHash.Length; ++i)
             {
                 ushort currChar = InvariantTextInfo.ToUpper(stringToHash[i]);
-                byte byteOne = (byte) currChar;              
-                byte byteTwo = (byte) (currChar >> 8);
+                byte byteOne = (byte) currChar; //lower bytes              
+                byte byteTwo = (byte) (currChar >> 8); //uppper byts
 
                 hash = HashByte(hash, byteOne);
                 hash = HashByte(hash, byteTwo);

@@ -13,7 +13,7 @@ namespace Ruzzie.Caching.Tests
         [Test]
         public void FlashCacheMultiThreadedTest()
         {
-            MultiThreadPerformanceTest(new FlashCache<string, int>(4, StringComparer.OrdinalIgnoreCase,8), 50000);
+            MultiThreadPerformanceTest(new FlashCache<string, int>(4, StringComparer.OrdinalIgnoreCase,8), 500000);
         }
 
         [Test]
