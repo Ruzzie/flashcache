@@ -85,7 +85,7 @@ namespace Ruzzie.Caching
         }
 
         private bool _disposed;
-        private readonly Random _random = new Random(Environment.TickCount);
+        private readonly Random _random = new SimpleRandom(Environment.TickCount);
 
         /// <summary>
         /// Disposed unmanaged resources.
