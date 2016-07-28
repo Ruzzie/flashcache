@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using Ruzzie.Common;
 using Ruzzie.Common.Collections;
 #if !PORTABLE
 using System.Threading.Tasks;
@@ -55,7 +56,7 @@ namespace Ruzzie.Caching
                 throw new ArgumentException("Cannot be less than one.", nameof(maximumSizeInMb));
             }
 
-            int flashEntryTypeSize = CalculateFlashEntryTypeSize(averageSizeInBytesOfKey, averageSizeInBytesOfValue);
+            int flashEntryTypeSize = CalculateFlashEntryTypeSize(averageSizeInBytesOfKey, averageSizeInBytesOfValue);//TODO: Add byte count of buffer and lock array
 
             _maxItemCount = SizeHelper.CalculateMaxItemCountInPowerOfTwo(maximumSizeInMb, flashEntryTypeSize);
 
