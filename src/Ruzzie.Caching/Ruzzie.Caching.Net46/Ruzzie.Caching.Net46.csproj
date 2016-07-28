@@ -55,8 +55,8 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Ruzzie.Common, Version=0.5.25.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Ruzzie.Common.0.5.25\lib\portable-net45+sl50+netcore45+wpa81+wp8\Ruzzie.Common.dll</HintPath>
+    <Reference Include="Ruzzie.Common, Version=0.7.28.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Ruzzie.Common.0.7.28\lib\portable-net45+sl50+netcore45+wpa81+wp8\Ruzzie.Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />

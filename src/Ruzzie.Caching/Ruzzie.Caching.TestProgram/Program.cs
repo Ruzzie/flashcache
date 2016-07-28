@@ -16,7 +16,7 @@ namespace Ruzzie.Caching.TestProgram
         [SuppressMessage("ReSharper", "AccessToModifiedClosure")]
         private static void Main()
         {
-            FlashCacheWithBucketsTests tests = new FlashCacheWithBucketsTests();
+            var tests = new FlashCacheWithBucketsTests();
             try
             {
                 //Run a lot of times to see if rare race condition takes place
