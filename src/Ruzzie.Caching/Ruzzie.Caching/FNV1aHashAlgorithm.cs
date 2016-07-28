@@ -21,7 +21,7 @@ namespace Ruzzie.Caching
         /// <exception cref="ArgumentNullException">if the bytes are null</exception>
         public int HashBytes(byte[] bytesToHash)
         {
-            if (bytesToHash == null)
+            if (ReferenceEquals(bytesToHash,null))
             {
                 throw new ArgumentNullException(nameof(bytesToHash));
             }
@@ -37,7 +37,7 @@ namespace Ruzzie.Caching
         /// <exception cref="ArgumentNullException">if the string is null</exception>
         public int HashStringCaseInsensitive(string stringToHash)
         {
-            if (stringToHash == null)
+            if (ReferenceEquals(stringToHash,null))
             {
                 throw new ArgumentNullException(nameof(stringToHash));
             }
@@ -47,13 +47,14 @@ namespace Ruzzie.Caching
 #if !PORTABLE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-        private static int HashBytesInternal(byte[] getBytes)
+        private static int HashBytesInternal(byte[] bytesToHash)
         {
             uint hash = FNVOffsetBasis32;
+            int byteCount = bytesToHash.Length;
 
-            for (int i = 0; i < getBytes.Length; ++i)
+            for (int i = 0; i < byteCount; ++i)
             {
-                hash = HashByte(hash, getBytes[i]);
+                hash = HashByte(hash, bytesToHash[i]);
             }
             return (int) hash;
         }
@@ -64,14 +65,15 @@ namespace Ruzzie.Caching
         private static int GetInvariantCaseInsensitiveHashCode(string stringToHash)
         {
             uint hash = FNVOffsetBasis32;
-            for (int i = 0; i < stringToHash.Length; ++i)
+            int stringLength = stringToHash.Length;
+
+            for (int i = 0; i < stringLength; ++i)
             {
                 ushort currChar = InvariantTextInfo.ToUpper(stringToHash[i]);
                 byte byteOne = (byte) currChar; //lower bytes              
                 byte byteTwo = (byte) (currChar >> 8); //uppper byts
-
-                hash = HashByte(hash, byteOne);
-                hash = HashByte(hash, byteTwo);
+                
+                hash = HashByte(HashByte(hash, byteOne), byteTwo);
             }
             return (int) hash;
         }
@@ -81,9 +83,7 @@ namespace Ruzzie.Caching
 #endif
         private static uint HashByte(uint currentHash, byte byteToHash)
         {
-            currentHash = currentHash ^ byteToHash;
-            currentHash = currentHash * FNVPrime32;
-            return currentHash;
+           return (currentHash ^ byteToHash) * FNVPrime32;
         }      
     }
 }

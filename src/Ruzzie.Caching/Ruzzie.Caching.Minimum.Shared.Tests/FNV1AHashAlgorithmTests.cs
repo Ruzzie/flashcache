@@ -10,6 +10,12 @@ namespace Ruzzie.Caching.Minimum.Shared.Tests
         private readonly IFlashCacheHashAlgorithm _hashAlgorithm = new FNV1AHashAlgorithm();
 
         [Test]
+        public void HashCodeTest()
+        {
+            Assert.That(_hashAlgorithm.HashStringCaseInsensitive("0"), Is.EqualTo(837651325));
+        }
+
+        [Test]
         public void SameHashCodeForSameString()
         {
             string stringToHash = "FlashCache is tha bomb";
