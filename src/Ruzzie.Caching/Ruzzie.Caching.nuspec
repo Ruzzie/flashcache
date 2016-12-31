@@ -14,7 +14,7 @@
     <copyright>Copyright 2015</copyright>
     <tags>Caching, Memory, Fixed size memory</tags>
     <dependencies>
-      <dependency id="Ruzzie.Common" version="(0.2.20,)" />
+      <dependency id="Ruzzie.Common" version="(0.6.20,)" />
     </dependencies>
   </metadata>
 
