@@ -1,6 +1,7 @@
 # FlashCache
 a fixed size high performant in memory cache
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/af09eda445a44c759f92953405d2bcb8)](https://www.codacy.com/app/dorus-verhoeckx/flashcache?utm_source=github.com&utm_medium=referral&utm_content=Ruzzie/flashcache&utm_campaign=badger)
 [![Build status](https://ci.appveyor.com/api/projects/status/1rt1eq4cmvlrphn7?svg=true)](https://ci.appveyor.com/project/Ruzzie/flashcache) 
 [![Coverage Status](https://coveralls.io/repos/Ruzzie/flashcache/badge.svg?branch=master&service=github)](https://coveralls.io/github/Ruzzie/flashcache?branch=master)
 [![NuGet](https://img.shields.io/nuget/v/Ruzzie.Cache.FlashCache.svg)](https://www.nuget.org/packages/Ruzzie.Cache.FlashCache)
