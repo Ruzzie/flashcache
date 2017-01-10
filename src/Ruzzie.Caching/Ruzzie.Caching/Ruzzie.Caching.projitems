@@ -13,7 +13,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Constants.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FlashCache.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FlashCacheWithBuckets.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)FNV1aHashAlgorithm.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FNV1AHashAlgorithmWrap.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IFixedSizeCache.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IFlashCacheHashAlgorithm.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SizeHelper.cs" />

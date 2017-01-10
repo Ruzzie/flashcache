@@ -7,7 +7,7 @@ namespace Ruzzie.Caching.Minimum.Shared.Tests
     // ReSharper disable once InconsistentNaming
     public class FNV1aHashAlgorithmTests
     {
-        private readonly IFlashCacheHashAlgorithm _hashAlgorithm = new FNV1AHashAlgorithm();
+        private readonly IFlashCacheHashAlgorithm _hashAlgorithm = new FNV1AHashAlgorithmWrap();
 
         [Test]
         public void HashCodeTest()
@@ -37,7 +37,7 @@ namespace Ruzzie.Caching.Minimum.Shared.Tests
         [TestFixture]
         public class HashStringCaseInsensitive
         {
-            private readonly IFlashCacheHashAlgorithm _hashAlgorithm = new FNV1AHashAlgorithm();
+            private readonly IFlashCacheHashAlgorithm _hashAlgorithm = new FNV1AHashAlgorithmWrap();
 
             [TestCase("The Doctor", "the doctor")]
             [TestCase("the Doctor", "the doctor")]
@@ -62,7 +62,5 @@ namespace Ruzzie.Caching.Minimum.Shared.Tests
                 Assert.That(_hashAlgorithm.HashStringCaseInsensitive(""), Is.EqualTo((int) defaultHash));
             }
         }
-
-
     }
 }
