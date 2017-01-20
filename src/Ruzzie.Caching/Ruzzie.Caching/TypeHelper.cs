@@ -41,18 +41,18 @@ namespace Ruzzie.Caching
             
                 if (EqualityComparer<T>.Default.Equals(obj) || obj == null)
                 {
-                    return SizeInMemoryForArray(sizeOfElement, defaultCollectionSizeWhenDefault, elementType.IsValueType);
+                    return SizeInMemoryForArray(sizeOfElement, defaultCollectionSizeWhenDefault, elementType.IsValueType());
                 }
                
                 if (array == null)
                 {                   
-                    throw new ArgumentException("Type was not of type Array when determining size but was. " + t.BaseType?.FullName, "obj");
+                    throw new ArgumentException("Type was not of type Array when determining size but was. " + t.BaseType()?.FullName, "obj");
                 }
 
-                return SizeInMemoryForArray(sizeOfElement, array.Length, elementType.IsValueType);
+                return SizeInMemoryForArray(sizeOfElement, array.Length, elementType.IsValueType());
             }
 
-            if (t.IsEnum)
+            if (t.IsEnum())
             {
                 return SizeOf(Enum.GetUnderlyingType(t), obj);
             }
@@ -112,13 +112,13 @@ namespace Ruzzie.Caching
                     fieldValue = fieldInfo.GetValue(obj);                   
                 }
 
-                if (fieldInfo.FieldType.IsNested && !fieldInfo.FieldType.IsValueType)//since we cannot resolve 2 way references easily
+                if (fieldInfo.FieldType.IsNested && !fieldInfo.FieldType.IsValueType())//since we cannot resolve 2 way references easily
                 {
                     size += IntPtr.Size;
                 }
                 else
                 {
-                    if (fieldInfo.FieldType.IsInterface && fieldValue == null)
+                    if (fieldInfo.FieldType.IsInterface() && fieldValue == null)
                     {
               
                     }
@@ -130,7 +130,7 @@ namespace Ruzzie.Caching
                 }
             }
           
-            return SizeHelper.CalculateActualSizeInBytesForType(size, Is64BitProcess, t.IsValueType);
+            return SizeHelper.CalculateActualSizeInBytesForType(size, Is64BitProcess, t.IsValueType());
         }
 
         private static int GetStringSize(string value)
@@ -190,5 +190,5 @@ namespace Ruzzie.Caching
         }
 
         static readonly bool Is64BitProcess = (IntPtr.Size == 8);
-    }    
+    }
 }

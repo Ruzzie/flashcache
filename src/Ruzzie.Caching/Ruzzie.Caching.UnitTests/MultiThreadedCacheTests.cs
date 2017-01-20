@@ -5,9 +5,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
 
-namespace Ruzzie.Caching.Tests
+namespace Ruzzie.Caching.UnitTests
 {
-    [TestFixture]
+#if HAVE_PARALLELPERFORMANCE
+    [TestFixture,Ignore("Takes too long on CI.")]
     public class MultiThreadedCacheTests
     {             
         [Test]
@@ -105,4 +106,5 @@ namespace Ruzzie.Caching.Tests
             return timer;
         }
     }
+#endif
 }

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using NUnit.Framework;
 
-namespace Ruzzie.Caching.Tests
+namespace Ruzzie.Caching.UnitTests
 {
     [TestFixture]
     public class FlashCacheTests : FixedCacheBaseTests

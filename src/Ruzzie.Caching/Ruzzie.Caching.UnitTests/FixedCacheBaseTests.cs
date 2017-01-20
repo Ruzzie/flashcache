@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using NUnit.Framework;
 
-namespace Ruzzie.Caching.Tests
+namespace Ruzzie.Caching.UnitTests
 {
     public abstract class FixedCacheBaseTests : CacheEfficiencyTests
     {
@@ -70,9 +70,9 @@ namespace Ruzzie.Caching.Tests
         [TestCase(1, 1)]
         [TestCase(2, 2)]
         [TestCase(10, 10)]
-        [TestCase(100, 100)]
-        [TestCase(500, 497)] //misses due to poor hash spreading icm. pow 2
-        [TestCase(1024, 1008)] //misses due to poor hash spreading icm. pow 2
+        [TestCase(100, 98)]
+        [TestCase(500, 480)] //misses due to poor hash spreading icm. pow 2
+        [TestCase(1024, 980)] //misses due to poor hash spreading icm. pow 2
         public void CacheItemCountShouldReturnOnlyItemsInCache(int numberOfItemsToInsert, int expectedCount)
         {
             IFixedSizeCache<string, Guid> cache = CreateCache<string, Guid>(1);
@@ -90,9 +90,9 @@ namespace Ruzzie.Caching.Tests
         [TestCase(1, 1)]
         [TestCase(2, 2)]
         [TestCase(10, 10)]
-        [TestCase(100, 99)] //misses due to poor hash spreading icm. pow 2
-        [TestCase(500, 489)] //misses due to poor hash spreading icm. pow 2
-        [TestCase(1024, 989)] //misses due to poor hash spreading icm. pow 2
+        [TestCase(100, 98)] //misses due to poor hash spreading icm. pow 2
+        [TestCase(500, 488)] //misses due to poor hash spreading icm. pow 2
+        [TestCase(1024, 988)] //misses due to poor hash spreading icm. pow 2
         public void CacheItemCountShouldReturnOnlyItemsInCacheWithGuidAsKey(int numberOfItemsToInsert, int expectedCount)
         {
             IFixedSizeCache<Guid, Guid> cache = CreateCache<Guid, Guid>(1);
@@ -145,7 +145,7 @@ namespace Ruzzie.Caching.Tests
             Assert.That(value, Is.EqualTo(10));
         }
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void FixtureSetUp()
         {
             _flashCacheShouldCacheSameValues = CreateCache<int, int>(1);
@@ -270,14 +270,14 @@ namespace Ruzzie.Caching.Tests
             string value;
             Assert.That(cache.TryGet(new KeyTestTypeWithConstantHash {Value = "b"}, out value), Is.False);
         }
-
+#if HAVE_PARALLELPERFORMANCE
         [Test]
         public void MultiThreadedReadWriteTest()
         {
             IFixedSizeCache<string, string> cache = CreateCache<string, string>(1);
             int maxItemCount = cache.MaxItemCount;
 
-            Parallel.For(0, maxItemCount, new ParallelOptions {MaxDegreeOfParallelism = -1}, i =>
+            Parallel.For(0, maxItemCount, new ParallelOptions {MaxDegreeOfParallelism = Environment.ProcessorCount}, i =>
             {
                 string key = i.ToString().PadLeft(20, 'C');
 
@@ -299,7 +299,7 @@ namespace Ruzzie.Caching.Tests
             IFixedSizeCache<string, byte> cache = null;
 
             //loop the cache size and assert a few times to check for bugs
-            for (var k = 0; k < 10; k++)
+            for (var k = 0; k < 5; k++)
             {
                 cache = CreateCache<string, byte>(1, StringComparer.OrdinalIgnoreCase);
                 //first fill cache
@@ -309,7 +309,7 @@ namespace Ruzzie.Caching.Tests
                 Assert.That(cache.CacheItemCount,
                     Is.GreaterThanOrEqualTo(cache.MaxItemCount*(MinimalEfficiencyInPercent/100.0)).And.LessThanOrEqualTo(cache.MaxItemCount));
             }
-
+            
             var mustLoop = true;
 
             //write loops
@@ -361,7 +361,7 @@ namespace Ruzzie.Caching.Tests
             message += "\n" + "Avg timer per write call: " + (double) (timer.Elapsed.Ticks*100)/counter + " ns.";
             Trace.WriteLine(message);
         }
-
+#endif
         [Test]
         public void MemorySizeApproximationSmokeTest()
         {

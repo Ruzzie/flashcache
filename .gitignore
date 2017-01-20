@@ -185,3 +185,5 @@ FakesAssemblies/
 
 src/Ruzzie.Caching/Ruzzie.Caching/nuget.exe
 nuget.exe
+project.lock.json
+src/Ruzzie.Caching/.vs/

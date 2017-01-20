@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using NUnit.Framework;
 
-namespace Ruzzie.Caching.Tests
+namespace Ruzzie.Caching.UnitTests
 {
     [TestFixture]
     public class FlashCacheWithBucketsTests : FixedCacheBaseTests
@@ -48,13 +48,13 @@ namespace Ruzzie.Caching.Tests
             Assert.That(itemTwo, Is.EqualTo((byte)2));
             Assert.That(cache.RealCacheItemCount, Is.EqualTo(2));
         }
-
+#if HAVE_PARALLELPERFORMANCE
         [Test]
         public void MultiThreadedOverwriteBucketTest()
         {                    
             FlashCacheWithBuckets<int, int> cache = new FlashCacheWithBuckets<int, int>(1);
             Random random = new Random();
-            int numberOfHashcodesToUse = 8192;
+            int numberOfHashcodesToUse = 1024;
             bool shouldWait = Environment.ProcessorCount > 1;
 
             //Generate values that would refer to the same index, but with different hashcodes
@@ -70,15 +70,17 @@ namespace Ruzzie.Caching.Tests
             }
 
             //Add them multithreaded
-            ParallelOptions parallelOptions = new ParallelOptions {MaxDegreeOfParallelism = -1};
+            ParallelOptions parallelOptions = new ParallelOptions {MaxDegreeOfParallelism = Environment.ProcessorCount};
             Parallel.For(0, numberOfHashcodesToUse,parallelOptions, i =>
             {
                 cache.GetOrAdd(hashCodesThatWouldReferToSameIndexArray[i], key =>
                 {
                     if (shouldWait)
                     {
+                        var dummy = random.Next(1, 5);
+                        dummy = random.Next(1, 5);
                         //Force a little bit of duration
-                        Thread.SpinWait(random.Next(64, 1024));
+                        //SpinWait.SpinUntil(() => false, random.Next(1, 5));                        
                     }
                     return key;
                 });
@@ -95,7 +97,7 @@ namespace Ruzzie.Caching.Tests
 
             Assert.That(cache.CacheItemCount, Is.EqualTo(numberOfHashcodesToUse));
         }
-
+#endif
         [Test]
         public void TrimShouldRemoveExcessValues()
         {

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using NUnit.Framework;
 
-namespace Ruzzie.Caching.Tests
+namespace Ruzzie.Caching.UnitTests
 {
     [SuppressMessage("ReSharper", "RedundantTypeArgumentsOfMethod")]
     [Category("CacheEfficiencyTests")]

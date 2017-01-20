@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Ruzzie.Caching.Tests
+namespace Ruzzie.Caching.UnitTests
 {
     public static class Histogram
     {

@@ -1,0 +1,56 @@
+{
+  "version": "1.0.0-*",
+  "testRunner": "nunit",
+  "dependencies": {
+    "dotnet-test-nunit": "3.4.0-*",
+    "NUnit": "3.5.0",
+    "Moq": "4.6.38-*",
+    "NUnit.Console": "3.5.0",
+    "Ruzzie.Caching": "1.0.0-*"
+  },
+  "frameworks": {
+    "netcoreapp1.0": {
+      "imports": [
+        "dnxcore50",
+        "portable-net45+win8"
+      ],
+      "dependencies": {
+        "Microsoft.NETCore.App": {
+          "version": "1.0.1",
+          "type": "platform"
+        }
+      },
+      "buildOptions": {
+        "define": [
+          "NET_STANDARD"
+        ]
+      }
+    },
+    "net46": {
+      "buildOptions": {
+        "define": [
+          "HAVE_SERIALIZABLE"
+        ]
+      },
+      "dependencies": {
+      },
+      "frameworkAssemblies": {
+      }
+    },
+    "net461": {
+      "buildOptions": {
+        "define": [
+          "HAVE_SERIALIZABLE",
+          "HAVE_PARALLELPERFORMANCE"
+        ]
+      },
+      "dependencies": {
+      },
+      "frameworkAssemblies": {
+      }
+    }
+  },
+  "buildOptions": {
+    "optimize": true
+  }
+}

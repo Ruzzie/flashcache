@@ -1,7 +1,7 @@
 ﻿using System.Text;
 using NUnit.Framework;
 
-namespace Ruzzie.Caching.Minimum.Shared.Tests
+namespace Ruzzie.Caching.UnitTests
 {
     [TestFixture]
     // ReSharper disable once InconsistentNaming
