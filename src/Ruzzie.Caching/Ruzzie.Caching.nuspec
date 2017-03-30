@@ -21,19 +21,20 @@
         <dependency id="System.Reflection.Extensions" version="[4.3.0, )" />
         <dependency id="System.Reflection.TypeExtensions" version="[4.3.0, )" />
         <dependency id="System.Threading.Tasks.Parallel" version="[4.0.1, )" />
-        <dependency id="Ruzzie.Common" version="[1.0.49, )" />
+        <dependency id="Ruzzie.Common" version="[1.0.51, )" />
       </group>
       <group targetFramework=".NETFramework4.5">
-        <dependency id="Ruzzie.Common" version="[1.0.49, )" />
+        <dependency id="Ruzzie.Common" version="[1.0.51, )" />
       </group>
       <group targetFramework=".NETFramework4.6">
-        <dependency id="Ruzzie.Common" version="[1.0.49, )" />
+        <dependency id="Ruzzie.Common" version="[1.0.51, )" />
       </group>
       <group targetFramework=".NETFramework4.6.1">
-        <dependency id="Ruzzie.Common" version="[1.0.49, )" />
+        <dependency id="Ruzzie.Common" version="[1.0.51, )" />
       </group>
       <group targetFramework=".NETPortable4.0-Profile344">
-        <dependency id="Ruzzie.Common" version="[1.0.49, )" />
+        <dependency id="Ruzzie.Common" version="[1.0.51, )" />
+        <dependency id="Microsoft.Bcl.Async" version="[1.0.168, )" />
       </group>
       <group targetFramework=".NETStandard1.6">
         <dependency id="NETStandard.Library" version="[1.6.1, )" />
@@ -42,7 +43,7 @@
         <dependency id="System.Reflection.Extensions" version="[4.3.0, )" />
         <dependency id="System.Reflection.TypeExtensions" version="[4.3.0, )" />
         <dependency id="System.Threading.Tasks.Parallel" version="[4.0.1, )" />
-        <dependency id="Ruzzie.Common" version="[1.0.49, )" />
+        <dependency id="Ruzzie.Common" version="[1.0.51, )" />
       </group>
     </dependencies>
     <frameworkAssemblies>
