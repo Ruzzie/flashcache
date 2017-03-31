@@ -14,7 +14,7 @@
     }
   },
   "dependencies": {
-    "Ruzzie.Common": "1.0.51"
+    "Ruzzie.Common": "1.1.52"
   },
   "frameworks": {
     "netstandard1.6": {

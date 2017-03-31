@@ -7,7 +7,7 @@ namespace Ruzzie.Caching
     /// Equality comparer for strings that uses <see cref="StringComparer.OrdinalIgnoreCase"/> for equality and <see cref="FNV1AHashAlgorithmWrap"/> for case insensitive string generating hashcodes.
     /// </summary>
     public class StringComparerOrdinalIgnoreCaseFNV1AHash : IEqualityComparer<string>
-    {
+    {       
         private static readonly StringComparer OrdinalIgnoreCaseComparer = StringComparer.OrdinalIgnoreCase;
         private static readonly IFlashCacheHashAlgorithm HashAlgorithm = new FNV1AHashAlgorithmWrap();
 
