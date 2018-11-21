@@ -10,7 +10,7 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("D Crafting")]
 [assembly: AssemblyProduct("Ruzzie.Caching")]
-[assembly: AssemblyCopyright("Copyright © Dorus Verhoeckx 2015")]
+[assembly: AssemblyCopyright("Copyright © Dorus Verhoeckx 2018")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

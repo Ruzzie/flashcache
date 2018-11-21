@@ -199,7 +199,7 @@ namespace Ruzzie.Caching
             return entryTypeSize;
         }
 
-#if !PORTABLE
+#if HAVE_METHODINLINING
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         private FlashEntry GetFlashEntryWithMemoryBarrier(int targetEntry)
@@ -207,7 +207,7 @@ namespace Ruzzie.Caching
             return Volatile.Read(ref _entries[targetEntry]);
         }
 
-#if !PORTABLE
+#if HAVE_METHODINLINING
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         private bool KeyIsEqual(TKey key, FlashEntry entry, int hashCode)
@@ -215,7 +215,7 @@ namespace Ruzzie.Caching
             return entry.HashCode == hashCode && _comparer.Equals(key, entry.Key);
         }
 
-#if !PORTABLE
+#if HAVE_METHODINLINING
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         private int GetTargetEntryIndexForHashcode(int hashCode)
@@ -223,7 +223,7 @@ namespace Ruzzie.Caching
             return (hashCode) & (_indexMask); // bitwise % operator since array is always length power of 2
         }
 
-#if !PORTABLE
+#if HAVE_METHODINLINING
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         private int GetHashcodeForKey(TKey key)
@@ -231,7 +231,7 @@ namespace Ruzzie.Caching
             return _comparer.GetHashCode(key);
         }
 
-#if !PORTABLE
+#if HAVE_METHODINLINING
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         private void InsertEntry(TKey key, int hashCode, TValue value, int targetEntry)

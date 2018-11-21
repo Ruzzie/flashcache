@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if !NETSTANDARD1_1
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using Ruzzie.Common;
@@ -9,6 +10,7 @@ using System.Threading.Tasks;
 
 namespace Ruzzie.Caching
 {
+
     /// <summary>
     /// Fixed size high performant in memory cache.
     ///     The use is a fixed size cache. Items are NOT guaranteed to be cached forever. Locations will be overwritten based
@@ -75,7 +77,7 @@ namespace Ruzzie.Caching
 
         private void InitializeLockArray()
         {
-#if !PORTABLE
+#if !PORTABLE 
             Parallel.For(0, _maxItemCount, i => _locks[i] = new object());
 #else
             for (int i = 0; i < _maxItemCount; i++)
@@ -511,3 +513,4 @@ namespace Ruzzie.Caching
         }
     }
 }
+#endif

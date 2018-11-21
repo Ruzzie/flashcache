@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 namespace Ruzzie.Caching
@@ -93,11 +94,13 @@ namespace Ruzzie.Caching
                 case "System.Guid":
                     return 16;
             }
-
+#if HAVE_FULL_REFLECTION
             //no basic types found, decompose fields
             //Ignore properties, since the have backing fields OR are essentially methods
             FieldInfo[] allFieldInfos = t.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly);
-          
+#else
+            FieldInfo[] allFieldInfos = t.GetRuntimeFields().Where(fi => fi.IsPublic && fi.IsStatic == false).ToArray();
+#endif
             for (int i = 0; i < allFieldInfos.Length; i++)
             {
                 FieldInfo fieldInfo = allFieldInfos[i];
