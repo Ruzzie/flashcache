@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 
@@ -28,29 +29,8 @@ namespace Ruzzie.Caching
             string typeName = t.FullName;
 
             if (t.IsArray)
-            {                
-                Array array = obj as Array;
-                Type elementType = t.GetElementType();
-
-                object elementObject = null;
-                if (array != null && array.Length > 0)
-                {
-                    elementObject = array.GetValue(0);
-                }
-
-                int sizeOfElement = SizeOf(elementType, elementObject);
-            
-                if (EqualityComparer<T>.Default.Equals(obj) || obj == null)
-                {
-                    return SizeInMemoryForArray(sizeOfElement, defaultCollectionSizeWhenDefault, elementType.IsValueType());
-                }
-               
-                if (array == null)
-                {                   
-                    throw new ArgumentException("Type was not of type Array when determining size but was. " + t.BaseType()?.FullName, "obj");
-                }
-
-                return SizeInMemoryForArray(sizeOfElement, array.Length, elementType.IsValueType());
+            {
+                return SizeOfArray(t, obj);
             }
 
             if (t.IsEnum())
@@ -58,64 +38,134 @@ namespace Ruzzie.Caching
                 return SizeOf(Enum.GetUnderlyingType(t), obj);
             }
 
+            if (IsSimpleType(obj, typeName, out size))
+            {
+                return size;
+            }
+
+            size = SizeOfCustomType(t, obj, size);
+
+            return SizeHelper.CalculateActualSizeInBytesForType(size, Is64BitProcess, t.IsValueType());
+        }
+
+        [SuppressMessage("Microsoft.Maintainability","CA1502:AvoidExcessiveComplexity")]
+        private static bool IsSimpleType<T>(in T obj, in string typeName, out int size)
+        {
             switch (typeName)
             {
-
                 case "System.SByte":
-                    return 1;
+                {
+                    size = 1;
+                    return true;
+                }
                 case "System.Byte":
-                    return 1;
+                {
+                    size = 1;
+                    return true;
+                }
                 case "System.Int16":
-                    return 2;
+                {
+                    size = 2;
+                    return true;
+                }
                 case "System.UInt16":
-                    return 2;
+                {
+                    size = 2;
+                    return true;
+                }
                 case "System.Int32":
-                    return 4;
+                {
+                    size = 4;
+                    return true;
+                }
                 case "System.UInt32":
-                    return 4;
+                {
+                    size = 4;
+                    return true;
+                }
                 case "System.Int64":
-                    return 8;
+                {
+                    size = 8;
+                    return true;
+                }
                 case "System.UInt64":
-                    return 8;
+                {
+                    size = 8;
+                    return true;
+                }
                 case "System.Char":
-                    return 2;
+                {
+                    size = 2;
+                    return true;
+                }
                 case "System.Single":
-                    return 4;
+                {
+                    size = 4;
+                    return true;
+                }
                 case "System.Double":
-                    return 8;
+                {
+                    size = 8;
+                    return true;
+                }
                 case "System.Decimal":
-                    return 16;
+                {
+                    size = 16;
+                    return true;
+                }
                 case "System.Boolean":
-                    return 1;
+                {
+                    size = 1;
+                    return true;
+                }
                 case "System.Object":
-                    return defaultObjectSizeInBytes;
+                {
+                    size = defaultObjectSizeInBytes;
+                    return true;
+                }
                 case "System.String":
-                    return GetStringSize(obj as string);
+                {
+                    size = GetStringSize(obj as string);
+                    return true;
+                }
                 case "System.Guid":
-                    return 16;
-            }
+                {
+                    size = 16;
+                    return true;
+                }
+            }           
+
+            size = 0;
+            return false;
+        }
+
+        private static int SizeOfCustomType<T>(Type t, in T obj, int size)
+        {
 #if HAVE_FULL_REFLECTION
             //no basic types found, decompose fields
             //Ignore properties, since the have backing fields OR are essentially methods
-            FieldInfo[] allFieldInfos = t.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly);
+            FieldInfo[] allFieldInfos = t.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic |
+                                                    BindingFlags.DeclaredOnly);
 #else
-            FieldInfo[] allFieldInfos = t.GetRuntimeFields().Where(fi => /*fi.IsPublic &&*/ fi.IsStatic == false).ToArray();
+            FieldInfo[] allFieldInfos =
+ t.GetRuntimeFields().Where(fi => /*fi.IsPublic &&*/ fi.IsStatic == false).ToArray();
 #endif
             for (int i = 0; i < allFieldInfos.Length; i++)
             {
                 FieldInfo fieldInfo = allFieldInfos[i];
                 object fieldValue;
-             
+
                 if (obj == null)
                 {
                     fieldValue = null;
                 }
                 else
-                { 
-                    fieldValue = fieldInfo.GetValue(obj);                   
+                {
+                    fieldValue = fieldInfo.GetValue(obj);
                 }
 
-                if (fieldInfo.FieldType.IsNested && !fieldInfo.FieldType.IsValueType())//since we cannot resolve 2 way references easily
+                if (fieldInfo.FieldType.IsNested && !fieldInfo.FieldType.IsValueType()
+                ) //since we cannot resolve 2 way references easily
                 {
                     size += IntPtr.Size;
                 }
@@ -123,17 +173,43 @@ namespace Ruzzie.Caching
                 {
                     if (fieldInfo.FieldType.IsInterface() && fieldValue == null)
                     {
-              
                     }
                     else
-                    {                      
+                    {
                         int sizeOf = SizeOf(fieldInfo.FieldType, fieldValue);
                         size += sizeOf;
                     }
                 }
             }
-          
-            return SizeHelper.CalculateActualSizeInBytesForType(size, Is64BitProcess, t.IsValueType());
+
+            return size;
+        }
+
+        private static int SizeOfArray<T>(Type t, in T obj)
+        {
+            Array array = obj as Array;
+            Type elementType = t.GetElementType();
+
+            object elementObject = null;
+            if (array != null && array.Length > 0)
+            {
+                elementObject = array.GetValue(0);
+            }
+
+            int sizeOfElement = SizeOf(elementType, elementObject);
+
+            if (EqualityComparer<T>.Default.Equals(obj) || obj == null)
+            {
+                return SizeInMemoryForArray(sizeOfElement, defaultCollectionSizeWhenDefault, elementType.IsValueType());
+            }
+
+            if (array == null)
+            {
+                throw new ArgumentException(
+                    "Type was not of type Array when determining size but was. " + t.BaseType()?.FullName, "obj");
+            }
+
+            return SizeInMemoryForArray(sizeOfElement, array.Length, elementType.IsValueType());
         }
 
         private static int GetStringSize(in string value)

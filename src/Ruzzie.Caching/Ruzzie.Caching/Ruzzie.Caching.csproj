@@ -14,6 +14,9 @@
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>git://github.com/Ruzzie/flashcache</RepositoryUrl>
     <License>MIT</License>
+    <!-- including PDB files in NuGet for source link because symbolsource.org does not support portable PDBs -->
+    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder> 
+
     <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
     <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
@@ -23,6 +26,7 @@
     <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
     <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
     <LangVersion>latest</LangVersion>
+
   </PropertyGroup>
 
   <PropertyGroup>
@@ -79,6 +83,8 @@
 
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net45' Or '$(TargetFramework)' == 'net451' Or '$(TargetFramework)' == 'net46' Or '$(TargetFramework)' == 'net461' Or '$(TargetFramework)' == 'net472' ">
     <DefineConstants>$(DefineConstants);HAVE_FULL_REFLECTION;HAVE_SERIALIZABLE;HAVE_METHODINLINING;HAVE_TYPEISASSIGNABLEFROM;HAVE_FILEINFO</DefineConstants>
+    <CodeAnalysisRuleSet>RuleSet.ruleset</CodeAnalysisRuleSet>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">

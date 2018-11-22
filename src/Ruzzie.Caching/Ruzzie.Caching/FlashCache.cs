@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using Ruzzie.Common.Threading;
 
@@ -48,7 +49,7 @@ namespace Ruzzie.Caching
         ///     account the memory space the data of the reference type hold by default. All lookups in the cache are an O(1)
         ///     operation.
         ///     The maximum size of the Cache object itself is guaranteed.
-        /// </remarks>
+        /// </remarks>        
         public FlashCache(in int maximumSizeInMb, IEqualityComparer<TKey> comparer = null, in int averageSizeInBytesOfKey = -1,
             in int averageSizeInBytesOfValue = -1)
         {
@@ -186,8 +187,9 @@ namespace Ruzzie.Caching
         /// </summary>
         /// <param name="trimOptions">The trim options.</param>
         /// <returns>0</returns>
+        [SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "trimOptions", Justification = "Needed for interface implementation.")]
         public int Trim(in TrimOptions trimOptions)
-        {
+        {//TODO: Extract to trimmablecache interface for flashcachewithbuckets
             return 0; //no trim necessary with this implementation.
         }
 
