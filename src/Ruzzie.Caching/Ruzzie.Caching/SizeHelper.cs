@@ -9,12 +9,12 @@ namespace Ruzzie.Caching
         {
             if (number < 0)
             {
-                throw new ArgumentOutOfRangeException("number","Only values greater than 0 are allowed.");
+                throw new ArgumentOutOfRangeException(nameof(number),"Only values greater than 0 are allowed.");
             }
 
             if (multiple <= 1)
             {
-                throw new ArgumentOutOfRangeException("multiple", "Only values greater than 1 are allowed.");
+                throw new ArgumentOutOfRangeException(nameof(multiple), "Only values greater than 1 are allowed.");
             }
 
             if (number == 0)
@@ -25,7 +25,7 @@ namespace Ruzzie.Caching
             return ((number - 1) | multiple - 1) + 1;
         }
 
-        internal static int CalculateActualSizeInBytesForType(int totalSizeInBytesOfItemsInType, bool is64Bit, bool isValueType  = false)
+        internal static int CalculateActualSizeInBytesForType(in int totalSizeInBytesOfItemsInType, bool is64Bit, bool isValueType  = false)
         {
             int typeSize = isValueType ? 0: TypeHelper.TypeOverhead(is64Bit);
 
@@ -41,7 +41,7 @@ namespace Ruzzie.Caching
             return Math.Max(actualSize, typeSize);
         }
 
-        internal static int CalculateMaxItemCountInPowerOfTwo(int maximumSizeInMb, int itemSizeInBytes)
+        internal static int CalculateMaxItemCountInPowerOfTwo(in int maximumSizeInMb, in int itemSizeInBytes)
         {
             long probableMaxArrayLength = (Constants.TwoGbInBytes - TypeHelper.ArrayOverHeadReferenceType()) / (itemSizeInBytes);
 
@@ -55,7 +55,7 @@ namespace Ruzzie.Caching
             return CalculateSizeWithMinimumOfOneMb(itemSizeInBytes, desiredArrayLength);
         }
 
-        private static int CalculateSizeWithMinimumOfOneMb(int entryTypeSizeInBytes, long desiredArrayLength)
+        private static int CalculateSizeWithMinimumOfOneMb(in int entryTypeSizeInBytes, in long desiredArrayLength)
         {
             int minimumItemCount = (int) (Constants.OneMbInBytes/entryTypeSizeInBytes);
             int sizeBasedOnDesiredLength = Convert.ToInt32(desiredArrayLength + 2).FindNearestPowerOfTwoEqualOrLessThan();

@@ -372,12 +372,13 @@ namespace Ruzzie.Caching.UnitTests
         [Test]
         public void MemorySizeApproximationForArrayOfUriTypeValuesTest()
         {
+            Random random = new Random();
             MemorySizeApproximationTest(s =>
             {
                 Uri[] uris = new Uri[89];
                 for (int j = 0; j < uris.Length; j++)
                 {
-                    uris[j] = new Uri("http://www." + j + ".com/abc/index.htm", UriKind.Absolute);
+                    uris[j] = new Uri("http://www." + j + random.Next() + ".com/abc/index.htm", UriKind.Absolute);
                     // ReSharper disable once ReturnValueOfPureMethodIsNotUsed
                     uris[j].GetComponents(UriComponents.Host, UriFormat.Unescaped);
                 }
@@ -417,24 +418,23 @@ namespace Ruzzie.Caching.UnitTests
         private void MemorySizeApproximationTest<TValue>(Func<string,TValue> valueFactory)
         {
             IFixedSizeCache<string, TValue> cache = CreateCache<string, TValue>(8);
+            GC.Collect();
             long before = GC.GetTotalMemory(true);
 
             Parallel.For(0, cache.MaxItemCount * 2, new ParallelOptions { MaxDegreeOfParallelism = -1 }, i =>
-            {
-                string key = i.ToString().PadRight(20, 'C');
-
-                cache.GetOrAdd(key, valueFactory.Invoke);
+            {          
+                cache.GetOrAdd(i.ToString().PadRight(20, 'C'), valueFactory.Invoke);
             });
 
-            cache.Trim(TrimOptions.Aggressive);
-
+            cache.Trim(TrimOptions.Aggressive);           
+           
+            GC.Collect();
             long after = GC.GetTotalMemory(true);
-
+            GC.KeepAlive(cache);
             double diff = after - before;
 
-            GC.KeepAlive(cache);
             double actualSizeInMb = (diff / 1024) / 1024;
-            Debug.WriteLine("Cache size was: " + actualSizeInMb.ToString("F") + " Mb Estimated size was: " + cache.SizeInMb + " Desired max size was: 8");
+            Console.WriteLine("Cache size was: " + actualSizeInMb.ToString("F") + " Mb Estimated size was: " + cache.SizeInMb + " Desired max size was: 8");
 
             Assert.That(actualSizeInMb, Is.EqualTo(cache.SizeInMb).Within(1 + ((1 / 100.0) * (100 - MinimalEfficiencyInPercent))));
         }

@@ -50,7 +50,7 @@ namespace Ruzzie.Caching
         /// <remarks>The size in Mb's is an estimation. If the key or value for the cache is a reference type, it does not take into account the memory space the data of the reference type hold by default. All lookups in the cache are an O(1) operation.
         /// The maximum size of the Cache object itself is guaranteed.
         /// </remarks>
-        public FlashCacheWithBuckets(int maximumSizeInMb, IEqualityComparer<TKey> comparer = null, int averageSizeInBytesOfKey = -1, int averageSizeInBytesOfValue = -1)
+        public FlashCacheWithBuckets(in int maximumSizeInMb, IEqualityComparer<TKey> comparer = null, in int averageSizeInBytesOfKey = -1, in int averageSizeInBytesOfValue = -1)
         {
             //TODO: Modify APi to be more clear about default collection and string sizes and the extra size parameters, and add something about the trim timing
             if (maximumSizeInMb < 1)
@@ -130,7 +130,7 @@ namespace Ruzzie.Caching
             Dispose(false);
         }
 
-        internal static int CalculateFlashEntryTypeSize(int averageSizeInBytesOfKey = -1, int averageSizeInBytesOfValue = -1)
+        internal static int CalculateFlashEntryTypeSize(in int averageSizeInBytesOfKey = -1, in int averageSizeInBytesOfValue = -1)
         {
             int entryTypeSize = TypeHelper.SizeOf(new FlashEntry(-1, default(TKey), default(TValue))) +
                                 (averageSizeInBytesOfKey > 0 ? averageSizeInBytesOfKey : 0) +
@@ -159,7 +159,7 @@ namespace Ruzzie.Caching
         ///     factory is returned.
         /// </returns>
         /// <exception cref="Exception">A delegate callback throws an exception.</exception>
-        public TValue GetOrAdd(TKey key, Func<TKey, TValue> valueFactory)
+        public TValue GetOrAdd(in TKey key, in Func<TKey, TValue> valueFactory)
         {
             if (valueFactory == null)
             {
@@ -223,28 +223,28 @@ namespace Ruzzie.Caching
         }
 
         // ReSharper disable once RedundantAssignment
-        private void GetFlashEntryUnsafe(int index, ref FlashEntry entry)
+        private void GetFlashEntryUnsafe(in int index, ref FlashEntry entry)
         {
             entry = _entries[index];            
         }
 
-        private bool KeyIsEqual(TKey key,  int hashCode, FlashEntry entryToCompareTo)
+        private bool KeyIsEqual(in TKey key, in int hashCode, in FlashEntry entryToCompareTo)
         {
             return entryToCompareTo.HashCode == hashCode && _comparer.Equals(key, entryToCompareTo.Key);
         }
 
-        private int GetTargetEntryIndexForHashcode(int hashCode)
+        private int GetTargetEntryIndexForHashcode(in int hashCode)
         {
             return (hashCode) & (_indexMask); // bitwise % operator since array is always length in power of 2
         }
 
-        private int GetHashcodeForKey(TKey key)
+        private int GetHashcodeForKey(in TKey key)
         {
             return _comparer.GetHashCode(key);
         }
 
         //Assume access to parent entry is ThreadSafe. The caller of this method is responsible for locking.
-        private void InsertEntry(TKey key, int hashCode, TValue value, int targetEntryIndex, ref FlashEntry entryToAddTo, ref FlashEntry entry)
+        private void InsertEntry(in TKey key, in int hashCode, in TValue value, in int targetEntryIndex, ref FlashEntry entryToAddTo, ref FlashEntry entry)
         {
             FlashEntry entryToInsert = new FlashEntry(hashCode, key, value);
             _addedHashcodesRingBuffer.WriteNext(hashCode);
@@ -305,7 +305,7 @@ namespace Ruzzie.Caching
             }
         }
 
-        internal int TrimCache(int trimSize, TrimOptions options = TrimOptions.Default)
+        internal int TrimCache(in int trimSize, in TrimOptions options = TrimOptions.Default)
         {
             if (_currentItemCount < _maxItemCount)
             {
@@ -413,13 +413,10 @@ namespace Ruzzie.Caching
         /// <param name="value">When this method returns, contains the value associated with the specified key, if the key is found; otherwise, the default value for the type of the value parameter. This parameter is passed uninitialized.</param>
         /// <returns>true if the <see cref="FlashCache{TKey,TValue}"/> contains an element with the specified key; otherwise, false.</returns>
         /// <remarks>If the key is not found, then the value parameter gets the appropriate default value for the type TValue; for example, 0 (zero) for integer types, false for Boolean types, and null for reference types. </remarks>
-        public bool TryGet(TKey key, out TValue value)
+        public bool TryGet(in TKey key, out TValue value)
         {
-            int hashCode;
-            int index;
-
             FlashEntry entry;
-            bool result = TryGetInternal(key, out entry, out hashCode, out index);
+            bool result = TryGetInternal(key, out entry, out _, out _);
             if (result)
             {
                 value = entry.Value;
@@ -430,7 +427,7 @@ namespace Ruzzie.Caching
             return false;
         }
 
-        private bool TryGetInternal(TKey key, out FlashEntry entry, out int hashCode, out int index)
+        private bool TryGetInternal(in TKey key, out FlashEntry entry, out int hashCode, out int index)
         {
             hashCode = GetHashcodeForKey(key);
             index = GetTargetEntryIndexForHashcode(hashCode);
@@ -465,7 +462,7 @@ namespace Ruzzie.Caching
         /// </summary>
         /// <param name="trimOptions">The trim options to use when trimming.</param>
         /// <returns>The number of items removed from the cache.</returns>
-        public int Trim(TrimOptions trimOptions)
+        public int Trim(in TrimOptions trimOptions)
         {
             if (CacheItemCount < MaxItemCount)
             {
@@ -491,7 +488,7 @@ namespace Ruzzie.Caching
             return 0;
         }
 
-        private FlashEntry GetFlashEntryWithMemoryBarrier(int index)
+        private FlashEntry GetFlashEntryWithMemoryBarrier(in int index)
         {
             return Common.Threading.Volatile.Read(ref _entries[index]);
         }
@@ -503,7 +500,7 @@ namespace Ruzzie.Caching
             public readonly TValue Value;
             public volatile FlashEntry Next;
 
-            public FlashEntry(int hashCode, TKey key, TValue value, FlashEntry next = null)
+            public FlashEntry(in int hashCode, in TKey key, in TValue value, FlashEntry next = null)
             {
                 HashCode = hashCode;
                 Key = key;

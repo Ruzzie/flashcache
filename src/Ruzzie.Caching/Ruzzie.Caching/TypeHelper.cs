@@ -7,7 +7,7 @@ namespace Ruzzie.Caching
 {
     internal static class TypeHelper
     {      
-        public static int SizeOf<T>(T obj)
+        public static int SizeOf<T>(in T obj)
         {          
             return SizeOf(obj.GetType(),obj);
         }
@@ -21,7 +21,7 @@ namespace Ruzzie.Caching
         /// <exception cref="FieldAccessException">In the .NET for Windows Store apps or the Portable Class Library, catch the base class exception, <see cref="T:System.MemberAccessException" />, instead.The caller does not have permission to access this field. </exception>
         /// <exception cref="NotSupportedException">A field is marked literal, but the field does not have one of the accepted literal types. </exception>
         /// <exception cref="ArgumentException">The method is neither declared nor inherited by the class of <paramref name="obj" />. </exception>
-        internal static int SizeOf<T>(Type t, T obj = default(T))
+        internal static int SizeOf<T>(Type t, in T obj = default(T))
 #pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
         {
             int size = 0;
@@ -99,7 +99,7 @@ namespace Ruzzie.Caching
             //Ignore properties, since the have backing fields OR are essentially methods
             FieldInfo[] allFieldInfos = t.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly);
 #else
-            FieldInfo[] allFieldInfos = t.GetRuntimeFields().Where(fi => fi.IsPublic && fi.IsStatic == false).ToArray();
+            FieldInfo[] allFieldInfos = t.GetRuntimeFields().Where(fi => /*fi.IsPublic &&*/ fi.IsStatic == false).ToArray();
 #endif
             for (int i = 0; i < allFieldInfos.Length; i++)
             {
@@ -136,7 +136,7 @@ namespace Ruzzie.Caching
             return SizeHelper.CalculateActualSizeInBytesForType(size, Is64BitProcess, t.IsValueType());
         }
 
-        private static int GetStringSize(string value)
+        private static int GetStringSize(in string value)
         {
             int stringSize = defaultStringLength;
             if (!string.IsNullOrWhiteSpace(value))

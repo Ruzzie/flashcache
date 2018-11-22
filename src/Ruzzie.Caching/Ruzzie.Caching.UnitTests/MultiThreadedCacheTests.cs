@@ -8,13 +8,13 @@ using NUnit.Framework;
 namespace Ruzzie.Caching.UnitTests
 {
 #if HAVE_PARALLELPERFORMANCE
-    [TestFixture,Ignore("Takes too long on CI.")]
+    [TestFixture/*,Ignore("Takes too long on CI.")*/]
     public class MultiThreadedCacheTests
     {             
         [Test]
         public void FlashCacheMultiThreadedTest()
         {
-            MultiThreadPerformanceTest(new FlashCache<string, int>(4, StringComparer.OrdinalIgnoreCase,8), 50000);
+            MultiThreadPerformanceTest(new FlashCache<string, int>(4, StringComparer.OrdinalIgnoreCase, 8), 50000);
         }
 
         [Test]
@@ -30,7 +30,7 @@ namespace Ruzzie.Caching.UnitTests
         }
 
         [Test]
-        public void FlashCacheWithBucketseWithFNVHashMultiThreadedTest()
+        public void FlashCacheWithBucketsWithFNVHashMultiThreadedTest()
         {
             MultiThreadPerformanceTest(new FlashCacheWithBuckets<string, int>(4, new StringComparerOrdinalIgnoreCaseFNV1AHash(), 8), 50000);
         }

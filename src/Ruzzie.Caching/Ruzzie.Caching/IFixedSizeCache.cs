@@ -39,7 +39,7 @@ namespace Ruzzie.Caching
         ///     The value. If it was cached the cached value is returned. If it was not cached the value from the value
         ///     factory is returned.
         /// </returns>
-        TValue GetOrAdd(TKey key, Func<TKey, TValue> valueFactory);
+        TValue GetOrAdd(in TKey key, in Func<TKey, TValue> valueFactory);
 
         /// <summary>
         /// Gets the value associated with the specified key.
@@ -48,7 +48,7 @@ namespace Ruzzie.Caching
         /// <param name="value">When this method returns, contains the value associated with the specified key, if the key is found; otherwise, the default value for the type of the value parameter. This parameter is passed uninitialized.</param>
         /// <returns>true if the <see cref="FlashCache{TKey,TValue}"/> contains an element with the specified key; otherwise, false.</returns>
         /// <remarks>If the key is not found, then the value parameter gets the appropriate default value for the type TValue; for example, 0 (zero) for integer types, false for Boolean types, and null for reference types. </remarks>
-        bool TryGet(TKey cacheKey, out TValue value);
+        bool TryGet(in TKey cacheKey, out TValue value);
 
 
         /// <summary>
@@ -57,7 +57,7 @@ namespace Ruzzie.Caching
         /// </summary>
         /// <param name="trimOptions">The trim options to use when trimming.</param>
         /// <returns>The number of items removed from the cache.</returns>
-        int Trim(TrimOptions trimOptions);
+        int Trim(in TrimOptions trimOptions);
     }
 
     /// <summary>

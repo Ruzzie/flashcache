@@ -49,8 +49,8 @@ namespace Ruzzie.Caching
         ///     operation.
         ///     The maximum size of the Cache object itself is guaranteed.
         /// </remarks>
-        public FlashCache(int maximumSizeInMb, IEqualityComparer<TKey> comparer = null, int averageSizeInBytesOfKey = -1,
-            int averageSizeInBytesOfValue = -1)
+        public FlashCache(in int maximumSizeInMb, IEqualityComparer<TKey> comparer = null, in int averageSizeInBytesOfKey = -1,
+            in int averageSizeInBytesOfValue = -1)
         {
             if (maximumSizeInMb < 1)
             {
@@ -62,7 +62,7 @@ namespace Ruzzie.Caching
             _maxItemCount = SizeHelper.CalculateMaxItemCountInPowerOfTwo(maximumSizeInMb, flashEntryTypeSize);
             _indexMask = _maxItemCount - 1;
 
-            _sizeInMb = ((_maxItemCount*flashEntryTypeSize)/1024)/1024;
+            _sizeInMb = ((_maxItemCount * flashEntryTypeSize) / 1024) / 1024;
 
             _comparer = comparer ?? EqualityComparer<TKey>.Default;
             _entries = new FlashEntry[_maxItemCount];
@@ -89,7 +89,7 @@ namespace Ruzzie.Caching
         ///     factory is returned.
         /// </returns>
         /// <exception cref="Exception">A delegate callback throws an exception.</exception>
-        public TValue GetOrAdd(TKey key, Func<TKey, TValue> valueFactory)
+        public TValue GetOrAdd(in TKey key, in Func<TKey, TValue> valueFactory)
         {
             if (valueFactory == null)
             {
@@ -157,7 +157,7 @@ namespace Ruzzie.Caching
         ///     If the key is not found, then the value parameter gets the appropriate default value for the type TValue; for
         ///     example, 0 (zero) for integer types, false for Boolean types, and null for reference types.
         /// </remarks>
-        public bool TryGet(TKey cacheKey, out TValue value)
+        public bool TryGet(in TKey cacheKey, out TValue value)
         {
             value = default(TValue);
 
@@ -186,12 +186,12 @@ namespace Ruzzie.Caching
         /// </summary>
         /// <param name="trimOptions">The trim options.</param>
         /// <returns>0</returns>
-        public int Trim(TrimOptions trimOptions)
+        public int Trim(in TrimOptions trimOptions)
         {
             return 0; //no trim necessary with this implementation.
         }
 
-        internal static int CalculateFlashEntryTypeSize(int averageSizeInBytesOfKey = -1, int averageSizeInBytesOfValue = -1)
+        internal static int CalculateFlashEntryTypeSize(in int averageSizeInBytesOfKey = -1, in int averageSizeInBytesOfValue = -1)
         {
             int entryTypeSize = TypeHelper.SizeOf(new FlashEntry(-1, default(TKey), default(TValue))) +
                                 (averageSizeInBytesOfKey > 0 ? averageSizeInBytesOfKey : 0) +
@@ -202,7 +202,7 @@ namespace Ruzzie.Caching
 #if HAVE_METHODINLINING
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-        private FlashEntry GetFlashEntryWithMemoryBarrier(int targetEntry)
+        private FlashEntry GetFlashEntryWithMemoryBarrier(in int targetEntry)
         {
             return Volatile.Read(ref _entries[targetEntry]);
         }
@@ -210,7 +210,7 @@ namespace Ruzzie.Caching
 #if HAVE_METHODINLINING
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-        private bool KeyIsEqual(TKey key, FlashEntry entry, int hashCode)
+        private bool KeyIsEqual(in TKey key, in FlashEntry entry, in int hashCode)
         {
             return entry.HashCode == hashCode && _comparer.Equals(key, entry.Key);
         }
@@ -218,7 +218,7 @@ namespace Ruzzie.Caching
 #if HAVE_METHODINLINING
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-        private int GetTargetEntryIndexForHashcode(int hashCode)
+        private int GetTargetEntryIndexForHashcode(in int hashCode)
         {
             return (hashCode) & (_indexMask); // bitwise % operator since array is always length power of 2
         }
@@ -226,7 +226,7 @@ namespace Ruzzie.Caching
 #if HAVE_METHODINLINING
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-        private int GetHashcodeForKey(TKey key)
+        private int GetHashcodeForKey(in TKey key)
         {
             return _comparer.GetHashCode(key);
         }
@@ -234,7 +234,7 @@ namespace Ruzzie.Caching
 #if HAVE_METHODINLINING
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-        private void InsertEntry(TKey key, int hashCode, TValue value, int targetEntry)
+        private void InsertEntry(in TKey key, in int hashCode, in TValue value, in int targetEntry)
         {
             FlashEntry entryToInsert = new FlashEntry(hashCode, key, value);
             Volatile.Write(ref _entries[targetEntry], entryToInsert);
@@ -246,7 +246,7 @@ namespace Ruzzie.Caching
             public readonly TKey Key;
             public readonly TValue Value;
 
-            public FlashEntry(int hashCode, TKey key, TValue value)
+            public FlashEntry(in int hashCode, in TKey key, in TValue value)
             {
                 HashCode = hashCode;
                 Key = key;
