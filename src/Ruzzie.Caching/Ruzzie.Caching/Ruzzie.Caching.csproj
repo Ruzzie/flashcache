@@ -9,7 +9,7 @@
     <TargetFrameworks>net40;net45;net451;net46;net461;net472;netstandard1.1;netstandard1.2;netstandard1.3;netstandard1.4;netstandard1.6;netstandard2.0</TargetFrameworks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <AssemblyName>Ruzzie.Caching</AssemblyName>
-    <PackageId>Ruzzie.Caching</PackageId>
+    <PackageId>Ruzzie.Cache.FlashCache</PackageId>
     <PackageProjectUrl>https://github.com/Ruzzie/flashcache</PackageProjectUrl>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>git://github.com/Ruzzie/flashcache</RepositoryUrl>
