@@ -10,6 +10,11 @@ namespace Ruzzie.Caching
     {      
         public static int SizeOf<T>(in T obj)
         {          
+            var underlyingTypeForNullable =  Nullable.GetUnderlyingType(typeof(T));
+            if (underlyingTypeForNullable != null)
+            {
+                return SizeOf(typeof(T), obj);
+            }
             return SizeOf(obj.GetType(),obj);
         }
 
@@ -37,7 +42,13 @@ namespace Ruzzie.Caching
             {
                 return SizeOf(Enum.GetUnderlyingType(t), obj);
             }
-
+            
+            var underlyingTypeForNullable =  Nullable.GetUnderlyingType(t);
+            if (underlyingTypeForNullable != null)
+            {
+                return SizeOf<bool>(typeof(bool)) + SizeOf(underlyingTypeForNullable, obj);
+            }
+            
             if (IsSimpleType(obj, typeName, out size))
             {
                 return size;
@@ -268,6 +279,6 @@ namespace Ruzzie.Caching
             return (overhead + (sizeOfElement * (numberOfElements)));
         }
 
-        static readonly bool Is64BitProcess = (IntPtr.Size == 8);
+        static readonly bool Is64BitProcess = (IntPtr.Size == 8);        
     }
 }

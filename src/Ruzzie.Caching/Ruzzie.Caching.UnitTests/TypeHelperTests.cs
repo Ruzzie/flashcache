@@ -42,6 +42,39 @@ namespace Ruzzie.Caching.UnitTests
             Assert.That(TypeHelper.SizeOf(value), Is.EqualTo(expectedSize));
         }
 
+        [Test]
+        public void NullableIntValueTests()
+        {
+            int? value = 4;
+            Assert.That(TypeHelper.SizeOf(value), Is.EqualTo(5));
+        }
+        
+        [Test]
+        public void NullableIntValueNullTests()
+        {
+            int? value = null;
+            // ReSharper disable once ExpressionIsAlwaysNull
+            Assert.That(TypeHelper.SizeOf(value), Is.EqualTo(5));
+        }
+
+        [Test]
+        public void NullableIntTypeTests()
+        {
+            int? value = null;
+            // ReSharper disable once ExpressionIsAlwaysNull
+            // ReSharper disable once RedundantTypeArgumentsOfMethod
+            Assert.That(TypeHelper.SizeOf<int?>(typeof(int?), value), Is.EqualTo(5));
+        }
+
+        [Test]
+        public void NullableCustomStructTypeTest()
+        {
+            CustomValueType? value = null;
+            // ReSharper disable once ExpressionIsAlwaysNull
+            // ReSharper disable once RedundantTypeArgumentsOfMethod
+            Assert.That(TypeHelper.SizeOf<CustomValueType?>(typeof(CustomValueType?), value), Is.EqualTo(9));
+        }
+
         [TestCase(new sbyte[] {1, 2}, 30)]
         [TestCase(new byte[] {1, 2}, 30)]
         [TestCase(new short[] {1, 2}, 32)] //32 || 24
@@ -68,6 +101,20 @@ namespace Ruzzie.Caching.UnitTests
 
             public string Name { get; set; }
             public int[] Values { get; }
+        }
+
+        public struct CustomValueType
+        {
+            public int IntVal { get; }
+            public bool BoolVal { get; }
+            public long LongVal { get; }
+
+            public CustomValueType(int intVal, bool boolVal, long longVal)
+            {
+                IntVal = intVal;
+                BoolVal = boolVal;
+                LongVal = longVal;
+            }
         }
         [Test]
         public void CustomTypeSizeTest()
