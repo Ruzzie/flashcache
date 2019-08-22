@@ -15,7 +15,8 @@ namespace Ruzzie.Caching
             {
                 return SizeOf(typeof(T), obj);
             }
-            return SizeOf(obj.GetType(),obj);
+
+            return SizeOf(obj!.GetType(), obj);
         }
 
         private static readonly int defaultCollectionSizeWhenDefault = 89;
@@ -136,7 +137,7 @@ namespace Ruzzie.Caching
                 }
                 case "System.String":
                 {
-                    size = GetStringSize(obj as string);
+                    size = GetStringSize((obj as string) ?? string.Empty);
                     return true;
                 }
                 case "System.Guid":
@@ -168,15 +169,14 @@ namespace Ruzzie.Caching
 
                 if (obj == null)
                 {
-                    fieldValue = null;
+                    fieldValue = null!;
                 }
                 else
                 {
                     fieldValue = fieldInfo.GetValue(obj);
                 }
 
-                if (fieldInfo.FieldType.IsNested && !fieldInfo.FieldType.IsValueType()
-                ) //since we cannot resolve 2 way references easily
+                if (fieldInfo.FieldType.IsNested && !fieldInfo.FieldType.IsValueType()) //since we cannot resolve 2 way references easily
                 {
                     size += IntPtr.Size;
                 }
@@ -198,10 +198,11 @@ namespace Ruzzie.Caching
 
         private static int SizeOfArray<T>(Type t, in T obj)
         {
-            Array array = obj as Array;
+            Array array = (obj as Array)!;
             Type elementType = t.GetElementType();
 
-            object elementObject = null;
+            object elementObject = null!;
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalse
             if (array != null && array.Length > 0)
             {
                 elementObject = array.GetValue(0);
@@ -209,6 +210,7 @@ namespace Ruzzie.Caching
 
             int sizeOfElement = SizeOf(elementType, elementObject);
 
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalse
             if (EqualityComparer<T>.Default.Equals(obj) || obj == null)
             {
                 return SizeInMemoryForArray(sizeOfElement, defaultCollectionSizeWhenDefault, elementType.IsValueType());

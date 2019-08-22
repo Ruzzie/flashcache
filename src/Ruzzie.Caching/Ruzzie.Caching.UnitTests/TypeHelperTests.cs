@@ -240,6 +240,14 @@ namespace Ruzzie.Caching.UnitTests
         }
 
         [Test]
+        public void FlashCacheWithPoolSizeTests_IntInt()
+        {
+            FlashCacheWithPool<int, int>.FlashEntryAlt entry = new FlashCacheWithPool<int, int>.FlashEntryAlt(1, 10, 1234);
+
+            Assert.That(TypeHelper.SizeOf(entry), Is.EqualTo(32));
+        }
+
+        [Test]
         public void FlashEntrySizeTests_ObjectObject()
         {
             FlashCache<object, object>.FlashEntry entry = new FlashCache<object, object>.FlashEntry(1, new object(), new object());

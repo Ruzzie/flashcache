@@ -436,7 +436,7 @@ namespace Ruzzie.Caching.UnitTests
             double actualSizeInMb = (diff / 1024) / 1024;
             Console.WriteLine("Cache size was: " + actualSizeInMb.ToString("F") + " Mb Estimated size was: " + cache.SizeInMb + " Desired max size was: 8");
 
-            Assert.That(actualSizeInMb, Is.EqualTo(cache.SizeInMb).Within(1 + ((1 / 100.0) * (100 - MinimalEfficiencyInPercent))));
+            Assert.That(actualSizeInMb, Is.EqualTo(cache.SizeInMb).Within(1 + ((1 / 100.0) * (100 - MinimalEfficiencyInPercent))).Or.LessThan(cache.SizeInMb));
         }
 
         [Test]

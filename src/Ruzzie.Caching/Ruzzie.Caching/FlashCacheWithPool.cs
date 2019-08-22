@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
-using Ruzzie.Common.Threading;
+using System.Threading;
+using Ruzzie.Common.Collections;
+using Volatile = Ruzzie.Common.Threading.Volatile;
 
 namespace Ruzzie.Caching
 {
@@ -11,17 +13,19 @@ namespace Ruzzie.Caching
     ///     The use is a fixed size cache. Items are NOT guaranteed to be cached forever. Locations will be overwritten based
     ///     on the hashcode.
     ///     This cache guarantees a fixed size and read and write thread safety.
+    ///     This variant uses pre-allocated entries, so GC is reduced. This comes at the cost of a tiny overhead when a hash collision occurs.
     /// </summary>
     /// <typeparam name="TKey">The cache key</typeparam>
     /// <typeparam name="TValue">The value to cache.</typeparam>
-    public class FlashCache<TKey, TValue> : IFixedSizeCache<TKey, TValue>
+    public class FlashCacheWithPool<TKey, TValue> : IFixedSizeCache<TKey, TValue>
     {
         private readonly IEqualityComparer<TKey> _comparer;
 
-        private readonly FlashEntry[] _entries;
+        private readonly FlashEntryAlt[] _entries;
         private readonly int _sizeInMb;
         private readonly int _maxItemCount;
         private readonly int _indexMask;
+        private readonly ConcurrentCircularOverwriteBuffer<FlashEntryAlt> _objectBufferPool;
 
         /// <summary>
         ///     Constructor. Creates the FlashCache of a fixed maximumSizeInMb.
@@ -50,7 +54,7 @@ namespace Ruzzie.Caching
         ///     operation.
         ///     The maximum size of the Cache object itself is guaranteed.
         /// </remarks>        
-        public FlashCache(in int maximumSizeInMb, IEqualityComparer<TKey> comparer, in int averageSizeInBytesOfKey = -1,
+        public FlashCacheWithPool(in int maximumSizeInMb, IEqualityComparer<TKey> comparer, in int averageSizeInBytesOfKey = -1,
             in int averageSizeInBytesOfValue = -1)
         {
             if (maximumSizeInMb < 1)
@@ -66,7 +70,20 @@ namespace Ruzzie.Caching
             _sizeInMb = ((_maxItemCount * flashEntryTypeSize) / 1024) / 1024;
 
             _comparer = comparer ?? EqualityComparer<TKey>.Default;
-            _entries = new FlashEntry[_maxItemCount];
+            _entries = new FlashEntryAlt[_maxItemCount];
+            for (int i = 0; i < _maxItemCount; i++)
+            {
+                _entries[i] = new FlashEntryAlt();
+            }
+
+            int objectBufferPoolSize = Environment.ProcessorCount * 8;
+            _objectBufferPool = new ConcurrentCircularOverwriteBuffer<FlashEntryAlt>(objectBufferPoolSize);
+            
+            //fill the buffer
+            for (int i = 0; i < objectBufferPoolSize; i++)
+            {
+                _objectBufferPool.WriteNext(new FlashEntryAlt());
+            }
         }
 
         /// <summary>
@@ -95,7 +112,7 @@ namespace Ruzzie.Caching
         ///     operation.
         ///     The maximum size of the Cache object itself is guaranteed.
         /// </remarks>   
-        public FlashCache(in int maximumSizeInMb,
+        public FlashCacheWithPool(in int maximumSizeInMb,
             in int averageSizeInBytesOfKey = -1,
             in int averageSizeInBytesOfValue = -1) : this(maximumSizeInMb, EqualityComparer<TKey>.Default,
             averageSizeInBytesOfKey, averageSizeInBytesOfValue)
@@ -134,17 +151,40 @@ namespace Ruzzie.Caching
             int hashCode = GetHashcodeForKey(key);
             int index = GetTargetEntryIndexForHashcode(hashCode);
 
-            FlashEntry entry = GetFlashEntryWithMemoryBarrier(index);
+            FlashEntryAlt entry = GetFlashEntryWithMemoryBarrier(index);
 
-            if (!ReferenceEquals(entry, null) && KeyIsEqual(key, entry, hashCode))
+            if (entry.HasValue)
             {
-                return entry.Value;
+                if (KeyIsEqual(key, entry, hashCode))
+                {
+                    return entry.Value;
+                }
+                else
+                {
+                    //Collision
+                    if (!_objectBufferPool.ReadNext(out var newEntry))
+                    {
+                        //If this happens the objectBufferPool is too small for the number of simultaneous requests
+                        newEntry = new FlashEntryAlt();
+                        _objectBufferPool.WriteNext(new FlashEntryAlt());
+                    }
+                    
+                    TValue newValue = valueFactory.Invoke(key);
+                    Interlocked.Exchange(ref _entries[index], newEntry.Set(hashCode, key, newValue));
+                    entry.Reset();
+                    _objectBufferPool.WriteNext(entry);
+                    return newValue;
+                }
             }
 
             TValue value = valueFactory.Invoke(key);
 
-            InsertEntry(key, hashCode, value, index);
-
+#if NET40 || PORTABLE
+            System.Threading.Thread.MemoryBarrier();
+#else
+            System.Threading.Interlocked.MemoryBarrier();
+#endif 
+            entry.Set(hashCode, key, value);
             return value;
         }
 
@@ -158,8 +198,8 @@ namespace Ruzzie.Caching
                 var itemCount = 0;
                 for (var i = 0; i < _entries.Length; i++)
                 {
-                    FlashEntry flashEntry = Volatile.Read(ref _entries[i]);
-                    if (!ReferenceEquals(flashEntry, null))
+                    FlashEntryAlt flashEntry = Volatile.Read(ref _entries[i]);
+                    if (flashEntry.HasValue /*ReferenceEquals(flashEntry, null)*/)
                     {
                         itemCount++;
                     }
@@ -199,9 +239,9 @@ namespace Ruzzie.Caching
             int hashCode = GetHashcodeForKey(cacheKey);
             int index = GetTargetEntryIndexForHashcode(hashCode);
 
-            FlashEntry entry = GetFlashEntryWithMemoryBarrier(index);
+            FlashEntryAlt entry = GetFlashEntryWithMemoryBarrier(index);
 
-            if (ReferenceEquals(entry, null))
+            if (!entry.HasValue)//ReferenceEquals(entry, null))
             {
                 return false;
             }
@@ -229,7 +269,8 @@ namespace Ruzzie.Caching
 
         internal static int CalculateFlashEntryTypeSize(in int averageSizeInBytesOfKey = -1, in int averageSizeInBytesOfValue = -1)
         {
-            int entryTypeSize = TypeHelper.SizeOf(new FlashEntry(-1, default(TKey)!, default(TValue)!)) +
+            
+            int entryTypeSize = TypeHelper.SizeOf(new FlashEntryAlt(0, default, default)) +
                                 (averageSizeInBytesOfKey > 0 ? averageSizeInBytesOfKey : 0) +
                                 (averageSizeInBytesOfValue > 0 ? averageSizeInBytesOfValue : 0);
             return entryTypeSize;
@@ -238,7 +279,7 @@ namespace Ruzzie.Caching
 #if HAVE_METHODINLINING
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-        private FlashEntry GetFlashEntryWithMemoryBarrier(in int targetEntry)
+        private FlashEntryAlt GetFlashEntryWithMemoryBarrier(int targetEntry)
         {
             return Volatile.Read(ref _entries[targetEntry]);
         }
@@ -246,7 +287,7 @@ namespace Ruzzie.Caching
 #if HAVE_METHODINLINING
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-        private bool KeyIsEqual(in TKey key, in FlashEntry entry, in int hashCode)
+        private bool KeyIsEqual(in TKey key, FlashEntryAlt entry, int hashCode)
         {
             return entry.HashCode == hashCode && _comparer.Equals(key, entry.Key);
         }
@@ -267,27 +308,46 @@ namespace Ruzzie.Caching
             return _comparer.GetHashCode(key);
         }
 
+        internal class FlashEntryAlt
+        {
+            public int HashCode { get; private set; }
+            public TKey Key { get; private set; }
+            public TValue Value { get; private set; }
+            public bool HasValue { get; private set; }
+            public FlashEntryAlt()
+            {
+                HasValue = false;
+            }
+
+            public FlashEntryAlt(int hashCode, TKey key, TValue value)
+            {
+               Set(hashCode, key, value);
+            }
+
 #if HAVE_METHODINLINING
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-        private void InsertEntry(in TKey key, in int hashCode, in TValue value, in int targetEntry)
-        {
-            FlashEntry entryToInsert = new FlashEntry(hashCode, key, value);
-            Volatile.Write(ref _entries[targetEntry], entryToInsert);
-        }
-
-        internal class FlashEntry
-        {
-            public readonly int HashCode;
-            public readonly TKey Key;
-            public readonly TValue Value;
-
-            public FlashEntry(in int hashCode, in TKey key, in TValue value)
+            public FlashEntryAlt Set(int hashCode, TKey key, TValue value)
             {
                 HashCode = hashCode;
                 Key = key;
                 Value = value;
+                HasValue = true;
+                return this;
             }
+
+#if HAVE_METHODINLINING
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+            public void Reset()
+            {
+                HasValue = false;
+                HashCode = 0;
+                Key = default;
+                Value = default;
+            }
+
+           
         }
     }
 }
