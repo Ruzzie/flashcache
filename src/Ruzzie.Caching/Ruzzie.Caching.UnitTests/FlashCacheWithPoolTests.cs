@@ -9,18 +9,10 @@ namespace Ruzzie.Caching.UnitTests
       
         protected override double MinimalEfficiencyInPercent { get { return 46; } }
 
-        protected override IFixedSizeCache<TKey, TValue> CreateCache<TKey, TValue>(int size, IEqualityComparer<TKey> equalityComparer = null)
+        protected override IFixedSizeCache<TKey, TValue> CreateCache<TKey, TValue>(int maxItemCount, IEqualityComparer<TKey> equalityComparer = null)
         {
-            return new FlashCacheWithPool<TKey, TValue>(size, equalityComparer);
+            return new FlashCacheWithPool<TKey, TValue>(equalityComparer, maxItemCount);
         }
         
-
-        [Test]
-        public void ShouldInitializeWithPassedSizesForReferenceType()
-        {
-            var cache = new FlashCacheWithPool<string, string>(4,averageSizeInBytesOfKey:48, averageSizeInBytesOfValue:48);
-
-            Assert.That(cache.MaxItemCount, Is.EqualTo(8192));
-        }
     }
 }

@@ -13,7 +13,7 @@ namespace Ruzzie.Caching.UnitTests
         [Test]
         public void SmokeTest()
         {
-            FlashCacheWithBuckets<string,byte> cache = new FlashCacheWithBuckets<string,byte>(1, StringComparer.OrdinalIgnoreCase);
+            FlashCacheWithBuckets<string,byte> cache = new FlashCacheWithBuckets<string,byte>(StringComparer.OrdinalIgnoreCase, 32768);
 
             Assert.That(cache.GetOrAdd("1",s => 1), Is.EqualTo((byte) 1));
             Assert.That(cache.CacheItemCount, Is.EqualTo(1));
@@ -22,7 +22,7 @@ namespace Ruzzie.Caching.UnitTests
         [Test]
         public void ItemsWithSameIndexShouldStillBeStoredWhenEnoughCapacity()
         {
-            FlashCacheWithBuckets<int, byte> cache = new FlashCacheWithBuckets<int, byte>(1);
+            FlashCacheWithBuckets<int, byte> cache = new FlashCacheWithBuckets<int, byte>(32768);
 
             Debug.WriteLine(cache.MaxItemCount);
 
@@ -37,7 +37,7 @@ namespace Ruzzie.Caching.UnitTests
         [Test]
         public void ShouldOverwriteBucketWhenValueIsUpdated()
         {
-            FlashCacheWithBuckets<int, byte> cache = new FlashCacheWithBuckets<int, byte>(1);
+            FlashCacheWithBuckets<int, byte> cache = new FlashCacheWithBuckets<int, byte>(32768);
 
             Debug.WriteLine(cache.MaxItemCount);
 
@@ -52,7 +52,7 @@ namespace Ruzzie.Caching.UnitTests
         [Test]
         public void MultiThreadedOverwriteBucketTest()
         {                    
-            FlashCacheWithBuckets<int, int> cache = new FlashCacheWithBuckets<int, int>(1);
+            FlashCacheWithBuckets<int, int> cache = new FlashCacheWithBuckets<int, int>(32768);
             Random random = new Random();
             int numberOfHashcodesToUse = 1024;
             bool shouldWait = Environment.ProcessorCount > 1;
@@ -101,7 +101,7 @@ namespace Ruzzie.Caching.UnitTests
         [Test]
         public void TrimShouldRemoveExcessValues()
         {
-            FlashCacheWithBuckets<string, byte> cache = new FlashCacheWithBuckets<string, byte>(4);
+            FlashCacheWithBuckets<string, byte> cache = new FlashCacheWithBuckets<string, byte>(32768);
 
             for (int i = 0; i < cache.MaxItemCount * 2; i++)
             {
@@ -116,7 +116,7 @@ namespace Ruzzie.Caching.UnitTests
         [Test]
         public void TrimShouldRemoveZeroEntriesWhenCacheIsEmpty()
         {
-            FlashCacheWithBuckets<string, byte> cache = new FlashCacheWithBuckets<string, byte>(1);
+            FlashCacheWithBuckets<string, byte> cache = new FlashCacheWithBuckets<string, byte>(32768);
 
             int count = cache.Trim(TrimOptions.Default);
 
@@ -126,7 +126,7 @@ namespace Ruzzie.Caching.UnitTests
         [Test]
         public void TrimWithDefaultShouldRemoveFivePercent()
         {
-            FlashCacheWithBuckets<string, byte> cache = new FlashCacheWithBuckets<string, byte>(1);
+            FlashCacheWithBuckets<string, byte> cache = new FlashCacheWithBuckets<string, byte>(32768);
             for (int i = 0; i < cache.MaxItemCount * 2; i++)
             {
                 cache.GetOrAdd(i.ToString(), key => 1);
@@ -141,7 +141,7 @@ namespace Ruzzie.Caching.UnitTests
         [Test]
         public void TrimWithDefaultShouldRemoveTwo()
         {
-            FlashCacheWithBuckets<string, byte> cache = new FlashCacheWithBuckets<string, byte>(1);
+            FlashCacheWithBuckets<string, byte> cache = new FlashCacheWithBuckets<string, byte>(32768);
             for (int i = 0; i < cache.MaxItemCount * 2; i++)
             {
                 cache.GetOrAdd(i.ToString(), key => 1);
@@ -155,16 +155,16 @@ namespace Ruzzie.Caching.UnitTests
         [Test]
         public void DisposeShouldNotThrowException()
         {
-            FlashCacheWithBuckets<string, byte> cache = new FlashCacheWithBuckets<string, byte>(1);
+            FlashCacheWithBuckets<string, byte> cache = new FlashCacheWithBuckets<string, byte>(32768);
 
             Assert.That(()=> cache.Dispose(), Throws.Nothing);
         }
 
         protected override double MinimalEfficiencyInPercent { get { return 100; } }
 
-        protected override IFixedSizeCache<TKey, TValue> CreateCache<TKey, TValue>(int size, IEqualityComparer<TKey> equalityComparer = null)
+        protected override IFixedSizeCache<TKey, TValue> CreateCache<TKey, TValue>(int maxItemCount, IEqualityComparer<TKey> equalityComparer = null)
         {
-            return new FlashCacheWithBuckets<TKey, TValue>(size,equalityComparer);
+            return new FlashCacheWithBuckets<TKey, TValue>(equalityComparer, maxItemCount);
         }
     }
 }

@@ -8,38 +8,38 @@ using NUnit.Framework;
 namespace Ruzzie.Caching.UnitTests
 {
 #if HAVE_PARALLELPERFORMANCE
-    [TestFixture/*,Ignore("Takes too long on CI.")*/]
+    [TestFixture,/* Ignore("Takes too long on CI.")*/]
     public class MultiThreadedCacheTests
     {      
         
         [Test]
         public void FlashCacheWithPoolMultiThreadedTest()
         {
-            MultiThreadPerformanceTest(new FlashCacheWithPool<string, int>(1, StringComparer.OrdinalIgnoreCase, 8), 50000);
+            MultiThreadPerformanceTest(new FlashCacheWithPool<string, int>(StringComparer.OrdinalIgnoreCase, 131072), 50000);
         }
 
         [Test]
         public void FlashCacheMultiThreadedTest()
         {
-            MultiThreadPerformanceTest(new FlashCache<string, int>(1, StringComparer.OrdinalIgnoreCase, 8), 50000);
+            MultiThreadPerformanceTest(new FlashCache<string, int>(StringComparer.OrdinalIgnoreCase, 131072), 50000);
         }
 
         [Test]
         public void FlashCacheWithFNVHashMultiThreadedTest()
         {
-            MultiThreadPerformanceTest(new FlashCache<string, int>(1, new StringComparerOrdinalIgnoreCaseFNV1AHash(), 8), 50000);
+            MultiThreadPerformanceTest(new FlashCache<string, int>(new StringComparerOrdinalIgnoreCaseFNV1AHash(), 131072), 50000);
         }
 
         [Test]
         public void FlashCacheWithBucketsMultiThreadedTest()
         {
-            MultiThreadPerformanceTest(new FlashCacheWithBuckets<string, int>(1, StringComparer.OrdinalIgnoreCase, 8), 50000);
+            MultiThreadPerformanceTest(new FlashCacheWithBuckets<string, int>(StringComparer.OrdinalIgnoreCase, 131072), 50000);
         }
 
         [Test]
         public void FlashCacheWithBucketsWithFNVHashMultiThreadedTest()
         {
-            MultiThreadPerformanceTest(new FlashCacheWithBuckets<string, int>(1, new StringComparerOrdinalIgnoreCaseFNV1AHash(), 8), 50000);
+            MultiThreadPerformanceTest(new FlashCacheWithBuckets<string, int>(new StringComparerOrdinalIgnoreCaseFNV1AHash(), 131072), 50000);
         }
 
         private static void MultiThreadPerformanceTest(IFixedSizeCache<string, int> cache, int loopCount)

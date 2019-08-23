@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using Ruzzie.Common.Numerics;
 using Ruzzie.Common.Threading;
 
 namespace Ruzzie.Caching
@@ -19,7 +20,6 @@ namespace Ruzzie.Caching
         private readonly IEqualityComparer<TKey> _comparer;
 
         private readonly FlashEntry[] _entries;
-        private readonly int _sizeInMb;
         private readonly int _maxItemCount;
         private readonly int _indexMask;
 
@@ -27,43 +27,25 @@ namespace Ruzzie.Caching
         ///     Constructor. Creates the FlashCache of a fixed maximumSizeInMb.
         ///     The use is a fixed size cache. Items are NOT guaranteed to be cached forever. Locations will be overwritten based
         ///     on the hashcode.
-        ///     This cache guarantees a fixed size and read and write thread safety. The cache will estimate the probable size of each type in the cache. 
-        ///     The size calculation in general use cases is pessimistic. If you see a big difference in real memory usage and the size of the cache, tune it with the parameters or give a larger size.
+        ///     This cache guarantees a fixed size and read and write thread safety.
         /// </summary>
-        /// <param name="maximumSizeInMb">
-        ///     The maximum desired size in MegaBytes of the cache. The cache size will be an
-        ///     approximation of the size in Mb's.
-        /// </param>
-        /// <param name="comparer">The desired equality comparer to use for comparing keys.</param>
-        /// <param name="averageSizeInBytesOfKey">
-        ///     Default -1. Only pass a value if the <typeparamref name="TKey" /> is a value
-        ///     type. This parameter takes the given bytes for calculating the maximum size of the cache.
-        /// </param>
-        /// <param name="averageSizeInBytesOfValue">
-        ///     Default -1. Only pass a value if the <typeparamref name="TValue" /> is a value
-        ///     type. This parameter takes the given bytes for calculating the maximum size of the cache.
-        /// </param>
-        /// <exception cref="ArgumentException">When the maximumSizeInMb is less than 1.</exception>
+        /// <param name="comparer">The comparer to use for the keys.</param>
+        /// <param name="maxItemCount">The (fixed) number of items this cache can hold.</param>
+        /// <exception cref="ArgumentException">When the maxItemCount is less than 2.</exception>
         /// <remarks>
-        ///     The size in Mb's is an estimation. If the key or value for the cache is a reference type, it does not take into
-        ///     account the memory space the data of the reference type hold by default. All lookups in the cache are an O(1)
+        ///     All lookups in the cache are an O(1)
         ///     operation.
         ///     The maximum size of the Cache object itself is guaranteed.
         /// </remarks>        
-        public FlashCache(in int maximumSizeInMb, IEqualityComparer<TKey> comparer, in int averageSizeInBytesOfKey = -1,
-            in int averageSizeInBytesOfValue = -1)
+        public FlashCache(IEqualityComparer<TKey> comparer, int maxItemCount)
         {
-            if (maximumSizeInMb < 1)
+            if (maxItemCount < 2)
             {
-                throw new ArgumentException("Cannot be less than one.", nameof(maximumSizeInMb));
+                throw new ArgumentException("Cannot be less than 2.", nameof(maxItemCount));
             }
 
-            int flashEntryTypeSize = CalculateFlashEntryTypeSize(averageSizeInBytesOfKey, averageSizeInBytesOfValue);
-
-            _maxItemCount = SizeHelper.CalculateMaxItemCountInPowerOfTwo(maximumSizeInMb, flashEntryTypeSize);
+            _maxItemCount = maxItemCount.FindNearestPowerOfTwoEqualOrLessThan();
             _indexMask = _maxItemCount - 1;
-
-            _sizeInMb = ((_maxItemCount * flashEntryTypeSize) / 1024) / 1024;
 
             _comparer = comparer ?? EqualityComparer<TKey>.Default;
             _entries = new FlashEntry[_maxItemCount];
@@ -76,29 +58,14 @@ namespace Ruzzie.Caching
         ///     This cache guarantees a fixed size and read and write thread safety. The cache will estimate the probable size of each type in the cache. 
         ///     The size calculation in general use cases is pessimistic. If you see a big difference in real memory usage and the size of the cache, tune it with the parameters or give a larger size.
         /// </summary>
-        /// <param name="maximumSizeInMb">
-        ///     The maximum desired size in MegaBytes of the cache. The cache size will be an
-        ///     approximation of the size in Mb's.
-        /// </param>
-        /// <param name="averageSizeInBytesOfKey">
-        ///     Default -1. Only pass a value if the <typeparamref name="TKey" /> is a value
-        ///     type. This parameter takes the given bytes for calculating the maximum size of the cache.
-        /// </param>
-        /// <param name="averageSizeInBytesOfValue">
-        ///     Default -1. Only pass a value if the <typeparamref name="TValue" /> is a value
-        ///     type. This parameter takes the given bytes for calculating the maximum size of the cache.
-        /// </param>
         /// <exception cref="ArgumentException">When the maximumSizeInMb is less than 1.</exception>
+        /// <param name="maxItemCount">The (fixed) number of items this cache can hold.</param>
         /// <remarks>
-        ///     The size in Mb's is an estimation. If the key or value for the cache is a reference type, it does not take into
-        ///     account the memory space the data of the reference type hold by default. All lookups in the cache are an O(1)
+        ///     All lookups in the cache are an O(1)
         ///     operation.
         ///     The maximum size of the Cache object itself is guaranteed.
         /// </remarks>   
-        public FlashCache(in int maximumSizeInMb,
-            in int averageSizeInBytesOfKey = -1,
-            in int averageSizeInBytesOfValue = -1) : this(maximumSizeInMb, EqualityComparer<TKey>.Default,
-            averageSizeInBytesOfKey, averageSizeInBytesOfValue)
+        public FlashCache(int maxItemCount) : this(EqualityComparer<TKey>.Default,maxItemCount)
         {
 
         }
@@ -168,13 +135,6 @@ namespace Ruzzie.Caching
             }
         }
 
-        /// <summary>
-        ///     The calculated maximum size in MB's that this cache should be.
-        /// </summary>
-        public int SizeInMb
-        {
-            get { return _sizeInMb; }
-        }
 
         /// <summary>
         ///     Gets the value associated with the specified key.
@@ -225,14 +185,6 @@ namespace Ruzzie.Caching
         public int Trim(in TrimOptions trimOptions)
         {//TODO: Extract to trimmablecache interface for flashcachewithbuckets
             return 0; //no trim necessary with this implementation.
-        }
-
-        internal static int CalculateFlashEntryTypeSize(in int averageSizeInBytesOfKey = -1, in int averageSizeInBytesOfValue = -1)
-        {
-            int entryTypeSize = TypeHelper.SizeOf(new FlashEntry(-1, default(TKey)!, default(TValue)!)) +
-                                (averageSizeInBytesOfKey > 0 ? averageSizeInBytesOfKey : 0) +
-                                (averageSizeInBytesOfValue > 0 ? averageSizeInBytesOfValue : 0);
-            return entryTypeSize;
         }
 
 #if HAVE_METHODINLINING

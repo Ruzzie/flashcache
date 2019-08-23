@@ -10,7 +10,7 @@ namespace Ruzzie.Caching.UnitTests
 {
     public abstract class FixedCacheBaseTests : CacheEfficiencyTests
     {
-        private IFixedSizeCache<int, int> _flashCacheShouldCacheSameValues = new FlashCache<int, int>(1);
+        private IFixedSizeCache<int, int> _flashCacheShouldCacheSameValues;
 
         [Test]
         public void Int32FixedSize()
@@ -26,7 +26,7 @@ namespace Ruzzie.Caching.UnitTests
 
         protected void CacheShouldStayFixedSize<T>(Func<int, T> keyFactory, int? customCacheItemCountToAssert = null)
         {
-            IFixedSizeCache<T, byte> cache = CreateCache<T, byte>(1);
+            IFixedSizeCache<T, byte> cache = CreateCache<T, byte>(131072);
             int numberOfItemsToInsert = cache.MaxItemCount*2; //add twice the items the cache can hold.
             for (var i = 0; i < numberOfItemsToInsert; i++)
             {
@@ -41,13 +41,13 @@ namespace Ruzzie.Caching.UnitTests
         [Test]
         public void GetOrAddThrowsArgumentNullExceptionWhenKeyIsNull()
         {
-            Assert.That(() => CreateCache<string, string>(1).GetOrAdd("1", null), Throws.TypeOf<ArgumentNullException>());
+            Assert.That(() => CreateCache<string, string>(16).GetOrAdd("1", null), Throws.TypeOf<ArgumentNullException>());
         }
 
         [Test]
         public void GetOrAddShouldCacheItem()
         {
-            IFixedSizeCache<string, int> cache = CreateCache<string, int>(1);
+            IFixedSizeCache<string, int> cache = CreateCache<string, int>(1024);
             var numberOfTimesCalled = 0;
 
             //Once
@@ -75,7 +75,7 @@ namespace Ruzzie.Caching.UnitTests
         [TestCase(1024, 980)] //misses due to poor hash spreading icm. pow 2
         public void CacheItemCountShouldReturnOnlyItemsInCache(int numberOfItemsToInsert, int expectedCount)
         {
-            IFixedSizeCache<string, Guid> cache = CreateCache<string, Guid>(1);
+            IFixedSizeCache<string, Guid> cache = CreateCache<string, Guid>(131072);
 
             for (var i = 0; i < numberOfItemsToInsert; i++)
             {
@@ -95,7 +95,7 @@ namespace Ruzzie.Caching.UnitTests
         [TestCase(1024, 988)] //misses due to poor hash spreading icm. pow 2
         public void CacheItemCountShouldReturnOnlyItemsInCacheWithGuidAsKey(int numberOfItemsToInsert, int expectedCount)
         {
-            IFixedSizeCache<Guid, Guid> cache = CreateCache<Guid, Guid>(1);
+            IFixedSizeCache<Guid, Guid> cache = CreateCache<Guid, Guid>(131072);
 
             for (var i = 0; i < numberOfItemsToInsert; i++)
             {
@@ -110,7 +110,7 @@ namespace Ruzzie.Caching.UnitTests
         [Test]
         public void GetOrAddShouldReturnValueFactoryResult()
         {
-            IFixedSizeCache<string, int> cache = CreateCache<string, int>(1);
+            IFixedSizeCache<string, int> cache = CreateCache<string, int>(1024);
 
             int value = cache.GetOrAdd("key", key => 1);
 
@@ -126,7 +126,7 @@ namespace Ruzzie.Caching.UnitTests
         [Test]
         public void OverwriteCacheLocationWithSameHash()
         {
-            IFixedSizeCache<KeyTestTypeWithConstantHash, int> flashCache = CreateCache<KeyTestTypeWithConstantHash, int>(1);
+            IFixedSizeCache<KeyTestTypeWithConstantHash, int> flashCache = CreateCache<KeyTestTypeWithConstantHash, int>(16);
 
             flashCache.GetOrAdd(new KeyTestTypeWithConstantHash {Value = "10"}, i => 10);
             int value = flashCache.GetOrAdd(new KeyTestTypeWithConstantHash {Value = "99"}, i => 99);
@@ -137,7 +137,7 @@ namespace Ruzzie.Caching.UnitTests
         [Test]
         public void ShouldCacheSameValue()
         {
-            IFixedSizeCache<string, int> flashCache = CreateCache<string, int>(1);
+            IFixedSizeCache<string, int> flashCache = CreateCache<string, int>(1024);
 
             flashCache.GetOrAdd("10", i => 10);
             int value = flashCache.GetOrAdd("10", i => 99);
@@ -148,7 +148,7 @@ namespace Ruzzie.Caching.UnitTests
         [OneTimeSetUp]
         public void FixtureSetUp()
         {
-            _flashCacheShouldCacheSameValues = CreateCache<int, int>(1);
+            _flashCacheShouldCacheSameValues = CreateCache<int, int>(131072);
         }
 
         [Test]
@@ -173,36 +173,33 @@ namespace Ruzzie.Caching.UnitTests
             (cache as IDisposable)?.Dispose();
         }
 
-        //protected abstract IFixedSizeCache<TKey, TValue> CreateCache<TKey, TValue>(int size, IEqualityComparer<TKey> equalityComparer);
-
-
         [Test]
         public void ShouldInitializeWithFixedMaximumSizeToNearestPowerOfTwo()
         {
-            IFixedSizeCache<string, string> cache = CreateCache<string, string>(1024);
+            IFixedSizeCache<string, string> cache = CreateCache<string, string>(4194344);
 
             Assert.That(cache.MaxItemCount, Is.EqualTo(4194304));
             (cache as IDisposable)?.Dispose();
         }
 
-        [TestCase(1)]
+        [Test]
+        public void ShouldInitializeWithPassedItemCount()
+        {
+           var cache = CreateCache<string, string>(8192);
+
+            Assert.That(cache.MaxItemCount, Is.EqualTo(8192));
+        }
+
+        [TestCase(4)]
         [TestCase(20)]
         [TestCase(100)]
         [TestCase(512)]
-        public void MaxMbShouldBeLessOrEqualToGivenMaxMb(int givenMax)
+        [TestCase(31235)]
+        public void MaxItemCountShouldBeLessOrEqualToGivenMaxItemCount(int givenMax)
         {
             IFixedSizeCache<string, string> cache = CreateCache<string, string>(givenMax);
 
-            Assert.That(cache.SizeInMb, Is.LessThanOrEqualTo(givenMax));
-            (cache as IDisposable)?.Dispose();
-        }
-
-        [Test]
-        public void ShouldInitializeWithFixedMaximumSizeToNearestPowerOfTwoWhenMaxIntIsGiven()
-        {
-            IFixedSizeCache<string, string> cache = CreateCache<string, string>((int.MaxValue)/2);
-
-            Assert.That(cache.MaxItemCount, Is.EqualTo(8388608));
+            Assert.That(cache.MaxItemCount, Is.LessThanOrEqualTo(givenMax));
             (cache as IDisposable)?.Dispose();
         }
 
@@ -212,7 +209,7 @@ namespace Ruzzie.Caching.UnitTests
             var keyOne = "No hammertime for: 19910";
             var keyTwo = "No hammertime for: 90063";
 
-            IFixedSizeCache<string, string> cache = CreateCache<string, string>(13);
+            IFixedSizeCache<string, string> cache = CreateCache<string, string>(1024);
 
             Assert.That(cache.GetOrAdd(keyOne, s => keyOne), Is.EqualTo(keyOne));
             Assert.That(cache.GetOrAdd(keyTwo, s => keyTwo), Is.EqualTo(keyTwo));
@@ -221,7 +218,7 @@ namespace Ruzzie.Caching.UnitTests
         [Test]
         public void TryGetShouldReturnTrueWhenValueIsInCache()
         {
-            IFixedSizeCache<string, int> cache = CreateCache<string, int>(1);
+            IFixedSizeCache<string, int> cache = CreateCache<string, int>(1024);
 
             cache.GetOrAdd("1", s => 1);
             int value;
@@ -231,7 +228,7 @@ namespace Ruzzie.Caching.UnitTests
         [Test]
         public void TryGetShouldSetOutValueWhenValueIsInCache()
         {
-            IFixedSizeCache<string, int> cache = CreateCache<string, int>(1);
+            IFixedSizeCache<string, int> cache = CreateCache<string, int>(1024);
 
             cache.GetOrAdd("1", s => 1);
             int value;
@@ -243,7 +240,7 @@ namespace Ruzzie.Caching.UnitTests
         [Test]
         public void TryGetShouldReturnFalseWhenValueIsNotInCache()
         {
-            IFixedSizeCache<string, int> cache = CreateCache<string, int>(1);
+            IFixedSizeCache<string, int> cache = CreateCache<string, int>(1024);
 
             int value;
 
@@ -253,7 +250,7 @@ namespace Ruzzie.Caching.UnitTests
         [Test]
         public void TryGetShouldSetOutValueToDefaultWhenValueIsNotInCache()
         {
-            IFixedSizeCache<string, int> cache = CreateCache<string, int>(1);
+            IFixedSizeCache<string, int> cache = CreateCache<string, int>(1024);
 
             int value;
             cache.TryGet("1", out value);
@@ -264,7 +261,7 @@ namespace Ruzzie.Caching.UnitTests
         [Test]
         public void TryGetShouldReturnFalseForItemWithSameHashcodeAndDifferentValues()
         {
-            IFixedSizeCache<KeyTestTypeWithConstantHash, string> cache = CreateCache<KeyTestTypeWithConstantHash, string>(1);
+            IFixedSizeCache<KeyTestTypeWithConstantHash, string> cache = CreateCache<KeyTestTypeWithConstantHash, string>(1024);
             cache.GetOrAdd(new KeyTestTypeWithConstantHash {Value = "a"}, hash => "1");
 
             string value;
@@ -274,10 +271,10 @@ namespace Ruzzie.Caching.UnitTests
         [Test]
         public void MultiThreadedReadWriteTest()
         {
-            IFixedSizeCache<string, string> cache = CreateCache<string, string>(1);
+            IFixedSizeCache<string, string> cache = CreateCache<string, string>(131072, new StringComparerOrdinalIgnoreCaseFNV1AHash());
             int maxItemCount = cache.MaxItemCount;
 
-            Parallel.For(0, maxItemCount, new ParallelOptions {MaxDegreeOfParallelism = Environment.ProcessorCount}, i =>
+            Parallel.For(0, maxItemCount, new ParallelOptions {MaxDegreeOfParallelism = Environment.ProcessorCount * 8}, i =>
             {
                 string key = i.ToString().PadLeft(20, 'C');
 
@@ -301,7 +298,7 @@ namespace Ruzzie.Caching.UnitTests
             //loop the cache size and assert a few times to check for bugs
             for (var k = 0; k < 5; k++)
             {
-                cache = CreateCache<string, byte>(1, StringComparer.OrdinalIgnoreCase);
+                cache = CreateCache<string, byte>(131072, StringComparer.OrdinalIgnoreCase);
                 //first fill cache
                 Parallel.For(0, cache.MaxItemCount, i => { cache.GetOrAdd(i.ToString().PadRight(20, 'M'), key => 1); });
 
@@ -363,86 +360,9 @@ namespace Ruzzie.Caching.UnitTests
         }
 #endif
         [Test]
-        public void MemorySizeApproximationSmokeTest()
-        {
-            Random random = new Random();
-            MemorySizeApproximationTest(s => random.Next());          
-        }
-
-        [Test]
-        public void MemorySizeApproximationForArrayOfUriTypeValuesTest()
-        {
-            Random random = new Random();
-            MemorySizeApproximationTest(s =>
-            {
-                Uri[] uris = new Uri[89];
-                for (int j = 0; j < uris.Length; j++)
-                {
-                    uris[j] = new Uri("http://www." + j + random.Next() + ".com/abc/index.htm", UriKind.Absolute);
-                    // ReSharper disable once ReturnValueOfPureMethodIsNotUsed
-                    uris[j].GetComponents(UriComponents.Host, UriFormat.Unescaped);
-                }
-
-                return uris;
-            });                         
-        }
-
-        [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Local")]
-        class CustomTypeForMemTest
-        {
-            public CustomTypeForMemTest(int[] values)
-            {
-                Values = values;
-            }
-
-            public string Name { get; set; }
-            public int[] Values { get; }
-        }
-
-        [Test]
-        public void MemorySizeApproximationForArrayOfCustomTypeValuesTest()
-        {
-            MemorySizeApproximationTest(s =>
-            {
-                CustomTypeForMemTest[] types = new CustomTypeForMemTest[89];
-                for (int j = 0; j < types.Length; j++)
-                {
-                    types[j] = new CustomTypeForMemTest(Enumerable.Range(0, 89).ToArray());
-                    types[j].Name = j.ToString().PadLeft(20, 'C');
-                }
-
-                return types;
-            });          
-        }
-
-        private void MemorySizeApproximationTest<TValue>(Func<string,TValue> valueFactory)
-        {
-            IFixedSizeCache<string, TValue> cache = CreateCache<string, TValue>(8);
-            GC.Collect();
-            long before = GC.GetTotalMemory(true);
-
-            Parallel.For(0, cache.MaxItemCount * 2, new ParallelOptions { MaxDegreeOfParallelism = -1 }, i =>
-            {          
-                cache.GetOrAdd(i.ToString().PadRight(20, 'C'), valueFactory.Invoke);
-            });
-
-            cache.Trim(TrimOptions.Aggressive);           
-           
-            GC.Collect();
-            long after = GC.GetTotalMemory(true);
-            GC.KeepAlive(cache);
-            double diff = after - before;
-
-            double actualSizeInMb = (diff / 1024) / 1024;
-            Console.WriteLine("Cache size was: " + actualSizeInMb.ToString("F") + " Mb Estimated size was: " + cache.SizeInMb + " Desired max size was: 8");
-
-            Assert.That(actualSizeInMb, Is.EqualTo(cache.SizeInMb).Within(1 + ((1 / 100.0) * (100 - MinimalEfficiencyInPercent))).Or.LessThan(cache.SizeInMb));
-        }
-
-        [Test]
         public void TrimShouldRemoveExcessEntriesWhenThereAreExcessEntries()
         {
-            IFixedSizeCache<string, int> cache = CreateCache<string, int>(1);
+            IFixedSizeCache<string, int> cache = CreateCache<string, int>(16);
             //overfill cache (that is why we use string, since the hashspreading in pow2 is poor
 
             for (var i = 0; i < cache.MaxItemCount*2; i++)

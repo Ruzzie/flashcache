@@ -2,11 +2,11 @@
 
   <PropertyGroup>
     <Description>a fixed size high performant in memory cache</Description>
-    <Copyright>Copyright © Dorus Verhoeckx 2018</Copyright>
+    <Copyright>Copyright © Dorus Verhoeckx 2019</Copyright>
     <AssemblyTitle>FlashCache</AssemblyTitle>
     <NeutralLanguage>en-US</NeutralLanguage>
     <Authors>Dorus Verhoeckx</Authors>
-    <TargetFrameworks>net40;net45;net451;net46;net461;net472;netstandard1.1;netstandard1.2;netstandard1.3;netstandard1.4;netstandard1.6;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>net45;net451;net46;net461;net472;netstandard1.6;netstandard2.0</TargetFrameworks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <AssemblyName>Ruzzie.Caching</AssemblyName>
     <PackageId>Ruzzie.Cache.FlashCache</PackageId>
@@ -26,6 +26,7 @@
     <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
     <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
     <LangVersion>latest</LangVersion>
+    <Platforms>AnyCPU;x64</Platforms>
 
   </PropertyGroup>
 
@@ -41,57 +42,27 @@
     <PackageReference Include="Ruzzie.Common" Version="4.0.0.73" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net40' ">
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="mscorlib" />
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.1' ">
-    <PackageReference Include="System.Threading" Version="4.3.0" />
-    <PackageReference Include="System.Reflection" Version="4.3.0" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.2' ">
-    <PackageReference Include="System.Threading" Version="4.3.0" />
-    <PackageReference Include="System.Threading.Tasks.Parallel" Version="4.0.1" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.3' ">
-    <PackageReference Include="System.Threading.Tasks.Parallel" Version="4.0.1" />
-    <PackageReference Include="System.IO.FileSystem" Version="4.3.0" />   
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.4' ">
-    <PackageReference Include="System.Threading.Tasks.Parallel" Version="4.0.1" />
-    <PackageReference Include="System.IO.FileSystem" Version="4.3.0" />   
-  </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.6' ">
-    <PackageReference Include="System.Threading.Tasks.Parallel" Version="4.0.1" />   
+    <PackageReference Include="System.Threading.Tasks.Parallel" Version="4.3.0" />   
     <PackageReference Include="System.Runtime.Serialization.Formatters" Version="4.3.0" />   
     <PackageReference Include="System.Reflection.Primitives" Version="4.3.0" />   
-    <PackageReference Include="System.Reflection.TypeExtensions" Version="4.3.0" />   
+    <PackageReference Include="System.Reflection.TypeExtensions" Version="4.5.1" />   
     <PackageReference Include="System.IO.FileSystem" Version="4.3.0" />   
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
-    <PackageReference Include="System.Reflection.TypeExtensions" Version="4.3.0" />  
+    <PackageReference Include="System.Reflection.TypeExtensions" Version="4.5.1" />  
   </ItemGroup>
 
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'net40' ">
-    <DefineConstants>$(DefineConstants);HAVE_SERIALIZABLE;HAVE_FULL_REFLECTION;</DefineConstants>
-  </PropertyGroup>
-
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net45' Or '$(TargetFramework)' == 'net451' Or '$(TargetFramework)' == 'net46' Or '$(TargetFramework)' == 'net461' Or '$(TargetFramework)' == 'net472' ">
-    <DefineConstants>$(DefineConstants);HAVE_FULL_REFLECTION;HAVE_SERIALIZABLE;HAVE_METHODINLINING;HAVE_TYPEISASSIGNABLEFROM;HAVE_FILEINFO</DefineConstants>
+    <DefineConstants>$(DefineConstants);HAVE_FULL_REFLECTION;HAVE_SERIALIZABLE;HAVE_METHODINLINING;HAVE_TYPEISASSIGNABLEFROM;HAVE_FILEINFO;HAVE_ENVIRONMENT_IS64BITPROCESS</DefineConstants>
     <CodeAnalysisRuleSet>RuleSet.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>true</RunCodeAnalysis>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
-    <DefineConstants>$(DefineConstants);HAVE_SERIALIZABLE;HAVE_FULL_REFLECTION;HAVE_METHODINLINING;HAVE_TYPEISASSIGNABLEFROM;HAVE_FILEINFO</DefineConstants>
+    <DefineConstants>$(DefineConstants);HAVE_SERIALIZABLE;HAVE_FULL_REFLECTION;HAVE_METHODINLINING;HAVE_TYPEISASSIGNABLEFROM;HAVE_FILEINFO;HAVE_ENVIRONMENT_IS64BITPROCESS</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.6' ">
@@ -114,13 +85,13 @@
     <DefineConstants>$(DefineConstants);HAVE_METHODINLINING</DefineConstants>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net40|AnyCPU'">
+  <PropertyGroup Condition="'$(Configuration)'=='Debug'">
     <DebugType>full</DebugType>
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net40|AnyCPU'">
-    <DebugType>full</DebugType>
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <DebugType>pdbonly</DebugType>
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
 

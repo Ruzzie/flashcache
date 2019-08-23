@@ -9,7 +9,7 @@ namespace Ruzzie.Caching.UnitTests
     [Category("CacheEfficiencyTests")]
     public abstract class CacheEfficiencyTests
     {
-        protected abstract IFixedSizeCache<TKey, TValue> CreateCache<TKey, TValue>(int size, IEqualityComparer<TKey> comparer = null);
+        protected abstract IFixedSizeCache<TKey, TValue> CreateCache<TKey, TValue>(int maxItemCount, IEqualityComparer<TKey> comparer = null);
 
         protected abstract double MinimalEfficiencyInPercent { get; }
 
@@ -118,7 +118,7 @@ namespace Ruzzie.Caching.UnitTests
 
         public void CacheEfficiencyShouldBe<T>(Func<int, T> keyFactory, int? customCacheItemCountToAssert = null, IEqualityComparer<T> comparer = null)
         {
-            IFixedSizeCache<T, byte> cache = CreateCache<T, byte>(1, comparer);
+            IFixedSizeCache<T, byte> cache = CreateCache<T, byte>(32768, comparer);
             int numberOfItemsToInsert = cache.MaxItemCount;
             for (int i = 0; i < numberOfItemsToInsert; i++)
             {

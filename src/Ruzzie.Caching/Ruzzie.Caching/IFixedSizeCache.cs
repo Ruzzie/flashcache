@@ -15,11 +15,6 @@ namespace Ruzzie.Caching
         int CacheItemCount { get; }
 
         /// <summary>
-        /// The calculated maximum size in MB's that this cache should be.
-        /// </summary>
-        int SizeInMb { get; }
-
-        /// <summary>
         /// Gets the potentially maximum number of items the cache can hold.
         /// </summary>
         /// <value>
