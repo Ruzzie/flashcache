@@ -10,7 +10,62 @@ namespace Ruzzie.Caching.UnitTests
 #if HAVE_PARALLELPERFORMANCE
     [TestFixture,/* Ignore("Takes too long on CI.")*/]
     public class MultiThreadedCacheTests
-    {      
+    {
+        [Test]
+        public void FlashCacheWithPoolMultipleReadersAndWritersOfRefTypes_ShouldNotCollide()
+        {
+            var maxItemCount = 256;
+            var cache = new FlashCacheWithPool<string, int[]>(
+                new StringComparerOrdinalIgnoreCaseFNV1AHash(),
+                maxItemCount);
+
+            MultipleConcurrentReadersAndWritersWithRefValue_SmokeTest(cache, maxItemCount);
+        }
+
+        [Test]
+        public void FlashCacheMultipleReadersAndWritersOfRefTypes_ShouldNotCollide()
+        {
+            var maxItemCount = 256;
+            var cache = new FlashCache<string, int[]>(
+                new StringComparerOrdinalIgnoreCaseFNV1AHash(),
+                maxItemCount);
+
+            MultipleConcurrentReadersAndWritersWithRefValue_SmokeTest(cache, maxItemCount);
+        }
+
+        [Test]
+        public void FlashCacheWithBucketsMultipleReadersAndWritersOfRefTypes_ShouldNotCollide()
+        {
+            var maxItemCount = 256;
+            var cache = new FlashCacheWithBuckets<string, int[]>(
+                new StringComparerOrdinalIgnoreCaseFNV1AHash(),
+                maxItemCount);
+
+            MultipleConcurrentReadersAndWritersWithRefValue_SmokeTest(cache, maxItemCount);
+        }
+
+        private static void MultipleConcurrentReadersAndWritersWithRefValue_SmokeTest(
+            IFixedSizeCache<string, int[]> cache,
+            int maxItemCount)
+        {
+            Parallel.For(0, maxItemCount * 16, i =>
+            {
+                //We are going to force collisions
+                var key = (i % maxItemCount).ToString().PadLeft(10, '0');
+                var firstValue = cache.GetOrAdd(key, k => new int[16]);
+
+                Assert.That(firstValue, Is.Not.Null, $"firstValue is null key:[{key}]");
+
+                var secondValue = cache.GetOrAdd(key, k => new int[16]);
+                //if (secondValue == null)
+                //{
+                //    secondValue = cache.GetOrAdd(key, k => new int[16]);
+                //}
+                Assert.That(secondValue, Is.Not.Null, $"secondValue is null key:[{key}]");
+            });
+        }
+
+        
         
         [Test]
         public void FlashCacheWithPoolMultiThreadedTest()

@@ -1,9 +1,9 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Threading;
-using Ruzzie.Common.Collections;
 using Ruzzie.Common.Numerics;
 using Volatile = Ruzzie.Common.Threading.Volatile;
 
@@ -25,7 +25,8 @@ namespace Ruzzie.Caching
         private readonly FlashEntryAlt[] _entries;
         private readonly int _maxItemCount;
         private readonly int _indexMask;
-        private readonly ConcurrentCircularOverwriteBuffer<FlashEntryAlt> _objectBufferPool;
+        //private readonly ConcurrentCircularOverwriteBuffer<FlashEntryAlt> _objectBufferPool;
+        private readonly ConcurrentQueue<FlashEntryAlt> _objectBufferPool;
 
         /// <summary>
         ///     Constructor. Creates the FlashCache of a fixed maximumSizeInMb.
@@ -53,18 +54,20 @@ namespace Ruzzie.Caching
 
             _comparer = comparer ?? EqualityComparer<TKey>.Default;
             _entries = new FlashEntryAlt[_maxItemCount];
+           
             for (int i = 0; i < _maxItemCount; i++)
             {
                 _entries[i] = new FlashEntryAlt();
             }
 
             int objectBufferPoolSize = Environment.ProcessorCount * 8;
-            _objectBufferPool = new ConcurrentCircularOverwriteBuffer<FlashEntryAlt>(objectBufferPoolSize);
+            _objectBufferPool = new ConcurrentQueue<FlashEntryAlt>(); //new ConcurrentCircularOverwriteBuffer<FlashEntryAlt>(objectBufferPoolSize);
             
-            //fill the buffer
+            //fill the object pool buffer
             for (int i = 0; i < objectBufferPoolSize; i++)
             {
-                _objectBufferPool.WriteNext(new FlashEntryAlt());
+                //_objectBufferPool.WriteNext(new FlashEntryAlt());
+                _objectBufferPool.Enqueue(new FlashEntryAlt());
             }
         }
 
@@ -120,39 +123,49 @@ namespace Ruzzie.Caching
 
             FlashEntryAlt entry = GetFlashEntryWithMemoryBarrier(index);
 
-            if (entry.HasValue)
+            //[The item is in the cache, return the value]
+            var entryHasValue = entry.HasValue;
+            var entryKey = entry.Key;
+            var entryHashCode = entry.HashCode;
+            var entryValue = entry.Value;
+
+            if (entryHasValue && KeyIsEqual(key, hashCode, entryKey, entryHashCode))
             {
-                if (KeyIsEqual(key, entry, hashCode))
-                {
-                    return entry.Value;
-                }
-                else
-                {
-                    //Collision
-                    if (!_objectBufferPool.ReadNext(out var newEntry))
-                    {
-                        //If this happens the objectBufferPool is too small for the number of simultaneous requests
-                        newEntry = new FlashEntryAlt();
-                        _objectBufferPool.WriteNext(new FlashEntryAlt());
-                    }
-                    
-                    TValue newValue = valueFactory.Invoke(key);
-                    Interlocked.Exchange(ref _entries[index], newEntry.Set(hashCode, key, newValue));
-                    entry.Reset();
-                    _objectBufferPool.WriteNext(entry);
-                    return newValue;
-                }
+                return entryValue;
             }
 
-            TValue value = valueFactory.Invoke(key);
+            //TODO: BUG IN HEAVY LOAD SCENARIO
+            //2. Check if there are objects available from the pool, so we don't have to allocate a new object
+            //if (!_objectBufferPool.ReadNext(out var newEntry))
+            if (!_objectBufferPool.TryDequeue(out var newEntry))
+            {
+                //If this happens the objectBufferPool is too small for the number of simultaneous requests
+                if (_objectBufferPool.Count == 0)
+                {
+                    //TODO: Resize Pool?
+                    //_objectBufferPool.WriteNext(new FlashEntryAlt());    
+                    _objectBufferPool.Enqueue(new FlashEntryAlt());
+                }
+
+                newEntry = new FlashEntryAlt();
+            }
+
+            //3. Get the value for the new entry
+            TValue newValue = valueFactory.Invoke(key);
+
+            //4. Store the new value in the cache
+            var oldEntry = Interlocked.Exchange(ref _entries[index], newEntry.Set(hashCode, key, newValue));
+
+            // reset old entry and return it to the pool
+            //_objectBufferPool.WriteNext( entry.Reset());
+            _objectBufferPool.Enqueue(oldEntry.Reset());
 
 #if NET40 || PORTABLE
             System.Threading.Thread.MemoryBarrier();
 #else
-            System.Threading.Interlocked.MemoryBarrier();
-#endif 
-            entry.Set(hashCode, key, value);
-            return value;
+            Interlocked.MemoryBarrier();
+#endif
+            return newValue;
         }
 
         /// <summary>
@@ -166,7 +179,7 @@ namespace Ruzzie.Caching
                 for (var i = 0; i < _entries.Length; i++)
                 {
                     FlashEntryAlt flashEntry = Volatile.Read(ref _entries[i]);
-                    if (flashEntry.HasValue /*ReferenceEquals(flashEntry, null)*/)
+                    if (flashEntry.HasValue)
                     {
                         itemCount++;
                     }
@@ -200,12 +213,12 @@ namespace Ruzzie.Caching
 
             FlashEntryAlt entry = GetFlashEntryWithMemoryBarrier(index);
 
-            if (!entry.HasValue)//ReferenceEquals(entry, null))
+            if (!entry.HasValue)
             {
                 return false;
             }
 
-            if (!KeyIsEqual(cacheKey, entry, hashCode))
+            if (!KeyIsEqual(cacheKey, hashCode, entry.Key, entry.HashCode))
             {
                 return false;
             }
@@ -237,15 +250,15 @@ namespace Ruzzie.Caching
 #if HAVE_METHODINLINING
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-        private bool KeyIsEqual(in TKey key, FlashEntryAlt entry, int hashCode)
+        private bool KeyIsEqual(in TKey key, int hashCode, TKey entryKey, int entryHashCode)
         {
-            return entry.HashCode == hashCode && _comparer.Equals(key, entry.Key);
+            return entryHashCode == hashCode && _comparer.Equals(key, entryKey);
         }
 
 #if HAVE_METHODINLINING
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-        private int GetTargetEntryIndexForHashcode(in int hashCode)
+        private int GetTargetEntryIndexForHashcode(int hashCode)
         {
             return (hashCode) & (_indexMask); // bitwise % operator since array is always length power of 2
         }
@@ -260,18 +273,34 @@ namespace Ruzzie.Caching
 
         internal class FlashEntryAlt
         {
-            public int HashCode { get; private set; }
-            public TKey Key { get; private set; }
-            public TValue Value { get; private set; }
-            public bool HasValue { get; private set; }
-            public FlashEntryAlt()
+            private long _hasValueFlag;
+            private volatile int _hashCode;
+
+            public bool HasValue
             {
-                HasValue = false;
+                get
+                {
+                    return Interlocked.Read(ref _hasValueFlag) == 1;
+                }
+                private set
+                {
+                    Interlocked.Exchange(ref _hasValueFlag, value ? 1 : 0);
+                }
             }
 
-            public FlashEntryAlt(int hashCode, TKey key, TValue value)
+            public int HashCode
             {
-               Set(hashCode, key, value);
+                get => _hashCode;
+                private set => _hashCode = value;
+            }
+
+            public TKey Key { get; private set; }
+
+            public TValue Value { get; private set; }
+
+            public FlashEntryAlt()
+            {
+                _hasValueFlag = 0;
             }
 
 #if HAVE_METHODINLINING
@@ -289,15 +318,14 @@ namespace Ruzzie.Caching
 #if HAVE_METHODINLINING
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-            public void Reset()
+            public FlashEntryAlt Reset()
             {
                 HasValue = false;
                 HashCode = 0;
                 Key = default;
                 Value = default;
+                return this;
             }
-
-           
         }
     }
 }
