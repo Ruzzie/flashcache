@@ -41,7 +41,7 @@ namespace Ruzzie.Caching
         ///     All lookups in the cache are an O(1)
         ///     operation.
         ///     The maximum size of the Cache object itself is guaranteed.
-        /// </remarks>     
+        /// </remarks>
         public FlashCacheWithPool(IEqualityComparer<TKey> comparer, int maxItemCount)
         {
             if (maxItemCount < 1)
@@ -54,7 +54,7 @@ namespace Ruzzie.Caching
 
             _comparer = comparer ?? EqualityComparer<TKey>.Default;
             _entries = new FlashEntryAlt[_maxItemCount];
-           
+
             for (int i = 0; i < _maxItemCount; i++)
             {
                 _entries[i] = new FlashEntryAlt();
@@ -62,7 +62,7 @@ namespace Ruzzie.Caching
 
             int objectBufferPoolSize = Environment.ProcessorCount * 8;
             _objectBufferPool = new ConcurrentQueue<FlashEntryAlt>(); //new ConcurrentCircularOverwriteBuffer<FlashEntryAlt>(objectBufferPoolSize);
-            
+
             //fill the object pool buffer
             for (int i = 0; i < objectBufferPoolSize; i++)
             {
@@ -75,7 +75,7 @@ namespace Ruzzie.Caching
         ///     Constructor. Creates the FlashCache of a fixed maximumSizeInMb.
         ///     The use is a fixed size cache. Items are NOT guaranteed to be cached forever. Locations will be overwritten based
         ///     on the hashcode.
-        ///     This cache guarantees a fixed size and read and write thread safety. The cache will estimate the probable size of each type in the cache. 
+        ///     This cache guarantees a fixed size and read and write thread safety. The cache will estimate the probable size of each type in the cache.
         ///     The size calculation in general use cases is pessimistic. If you see a big difference in real memory usage and the size of the cache, tune it with the parameters or give a larger size.
         /// </summary>
         /// <exception cref="ArgumentException">When the maximumSizeInMb is less than 1.</exception>
@@ -84,7 +84,7 @@ namespace Ruzzie.Caching
         ///     All lookups in the cache are an O(1)
         ///     operation.
         ///     The maximum size of the Cache object itself is guaranteed.
-        /// </remarks>   
+        /// </remarks>
         public FlashCacheWithPool(int maxItemCount) : this(EqualityComparer<TKey>.Default, maxItemCount)
         {
 
@@ -133,8 +133,7 @@ namespace Ruzzie.Caching
             {
                 return entryValue;
             }
-
-            //TODO: BUG IN HEAVY LOAD SCENARIO
+            
             //2. Check if there are objects available from the pool, so we don't have to allocate a new object
             //if (!_objectBufferPool.ReadNext(out var newEntry))
             if (!_objectBufferPool.TryDequeue(out var newEntry))
@@ -143,7 +142,7 @@ namespace Ruzzie.Caching
                 if (_objectBufferPool.Count == 0)
                 {
                     //TODO: Resize Pool?
-                    //_objectBufferPool.WriteNext(new FlashEntryAlt());    
+                    //_objectBufferPool.WriteNext(new FlashEntryAlt());
                     _objectBufferPool.Enqueue(new FlashEntryAlt());
                 }
 
@@ -294,9 +293,9 @@ namespace Ruzzie.Caching
                 private set => _hashCode = value;
             }
 
-            public TKey Key { get; private set; }
+            public TKey Key { get; private set; } = default!;
 
-            public TValue Value { get; private set; }
+            public TValue Value { get; private set; } = default!;
 
             public FlashEntryAlt()
             {
@@ -322,8 +321,8 @@ namespace Ruzzie.Caching
             {
                 HasValue = false;
                 HashCode = 0;
-                Key = default;
-                Value = default;
+                Key      = default!;
+                Value    = default!;
                 return this;
             }
         }

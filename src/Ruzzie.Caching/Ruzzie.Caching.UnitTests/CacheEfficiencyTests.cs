@@ -22,49 +22,49 @@ namespace Ruzzie.Caching.UnitTests
         [Test]
         public void ByteEfficiency()
         {
-            CacheEfficiencyShouldBe<byte>(i => (byte)(i - (Byte.MaxValue / 2)), 256);
+            CacheEfficiencyShouldBe<byte>(i => (byte)(i - (byte.MaxValue / 2)), 256);
         }
 
         [Test]
         public void SByteEfficiency()
         {
-            CacheEfficiencyShouldBe<sbyte>(i => (sbyte)(i - (SByte.MaxValue / 2)), 256);
+            CacheEfficiencyShouldBe<sbyte>(i => (sbyte)(i - (sbyte.MaxValue / 2)), 256);
         }
 
         [Test]
         public void Int16Efficiency()
         {
-            CacheEfficiencyShouldBe<short>(i => (short)(i - (Int16.MaxValue / 2)));
+            CacheEfficiencyShouldBe<short>(i => (short)(i - (short.MaxValue / 2)));
         }
 
         [Test]
         public void UInt16Efficiency()
         {
-            CacheEfficiencyShouldBe<ushort>(i => (ushort)(i - (UInt16.MaxValue / 2)));
+            CacheEfficiencyShouldBe<ushort>(i => (ushort)(i - (ushort.MaxValue / 2)));
         }
 
         [Test]
         public void Int32Efficiency()
         {
-            CacheEfficiencyShouldBe<int>(i => i - (Int32.MaxValue / 2));
+            CacheEfficiencyShouldBe<int>(i => i - (int.MaxValue / 2));
         }
 
         [Test]
         public void UInt32Efficiency()
         {
-            CacheEfficiencyShouldBe<uint>(i => (uint)i - (UInt32.MaxValue / 2));
+            CacheEfficiencyShouldBe<uint>(i => (uint)i - (uint.MaxValue / 2));
         }
 
         [Test]
         public void Int64Efficiency()
         {
-            CacheEfficiencyShouldBe<long>(i => i - (Int64.MaxValue / 2));
+            CacheEfficiencyShouldBe<long>(i => i - (long.MaxValue / 2));
         }
 
         [Test]
         public void UInt64Efficiency()
         {
-            CacheEfficiencyShouldBe<ulong>(i => (ulong)i - (UInt64.MaxValue / 2));
+            CacheEfficiencyShouldBe<ulong>(i => (ulong)i - (ulong.MaxValue / 2));
         }
 
         [Test]
@@ -82,13 +82,13 @@ namespace Ruzzie.Caching.UnitTests
         [Test]
         public void DecimalEfficiency()
         {
-            CacheEfficiencyShouldBe<decimal>(i => (decimal)i / 2.0m * 10000.0m);
+            CacheEfficiencyShouldBe<decimal>(i => (decimal)i / 2.0m/* * 10000.0m*/);
         }
 
         [Test]
         public void CharEfficiency()
         {
-            CacheEfficiencyShouldBe<char>(i => (char)(i - (Char.MaxValue / 2)));
+            CacheEfficiencyShouldBe<char>(i => (char)(i - (char.MaxValue / 2)));
         }
 
         [Test]
@@ -135,7 +135,6 @@ namespace Ruzzie.Caching.UnitTests
             }
             else
             {
-
                 Assert.That(efficiency, Is.GreaterThanOrEqualTo(MinimalEfficiencyInPercent), "Cache efficiency is not " + MinimalEfficiencyInPercent + " percent for type: " + typeof(T));
             }
         }
