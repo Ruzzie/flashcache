@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp3.1;</TargetFrameworks>
+      <TargetFramework>net6.0</TargetFramework>
     <AssemblyName>Ruzzie.Caching.UnitTests</AssemblyName>
     <PackageId>Ruzzie.Caching.UnitTests</PackageId>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
@@ -18,11 +18,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.9.1" />
-      <PackageReference Include="nunit" Version="3.13.1" />
-      <PackageReference Include="NUnit3TestAdapter" Version="3.17.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.2.0" />
+      <PackageReference Include="nunit" Version="3.13.3" />
+      <PackageReference Include="NUnit3TestAdapter" Version="4.2.1" />
   </ItemGroup>
 
+    <PropertyGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
+        <DefineConstants>$(DefineConstants);HAVE_SERIALIZABLE;HAVE_PARALLELPERFORMANCE</DefineConstants>
+    </PropertyGroup>
     <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp3.1' ">
         <DefineConstants>$(DefineConstants);HAVE_SERIALIZABLE;HAVE_PARALLELPERFORMANCE</DefineConstants>
     </PropertyGroup>

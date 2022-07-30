@@ -1,5 +1,4 @@
-﻿
-using Ruzzie.Common.Numerics;
+﻿using Ruzzie.Common.Numerics;
 #if !NETSTANDARD1_1
 using System;
 using System.Collections.Generic;
@@ -12,7 +11,6 @@ using System.Threading.Tasks;
 
 namespace Ruzzie.Caching
 {
-
     /// <summary>
     /// Fixed size high performant in memory cache.
     ///     The use is a fixed size cache. Items are NOT guaranteed to be cached forever. Locations will be overwritten based
@@ -22,18 +20,18 @@ namespace Ruzzie.Caching
     /// <typeparam name="TKey">The cache key</typeparam>
     /// <typeparam name="TValue">The value to cache.</typeparam>
     public class FlashCacheWithBuckets<TKey, TValue> : IFixedSizeCache<TKey, TValue>, IDisposable
-    {      
-        private const int TrimTimerInSeconds = 30;
+    {
+        private const    int                     TrimTimerInSeconds = 30;
         private readonly IEqualityComparer<TKey> _comparer;
 
-        private readonly FlashEntry[] _entries;
-        private readonly int _maxItemCount;
-        private readonly ConcurrentCircularOverwriteBuffer<int> _addedHashcodesRingBuffer;
+        private readonly FlashEntry[]                           _entries;
+        private readonly int                                    _maxItemCount;
+        private readonly ConcurrentCircularOverwriteBuffer<int> _addedHashCodesRingBuffer;
 
         private readonly Timer _trimTimer;
 
-        private long _currentItemCount;
-        private readonly int _indexMask;
+        private          long _currentItemCount;
+        private readonly int  _indexMask;
 
         private readonly object[] _locks;
 
@@ -60,12 +58,15 @@ namespace Ruzzie.Caching
             _indexMask = _maxItemCount - 1;
 
             _comparer = comparer ?? EqualityComparer<TKey>.Default;
-            _entries = new FlashEntry[_maxItemCount];
-            _locks = new object[_maxItemCount];
+            _entries  = new FlashEntry[_maxItemCount];
+            _locks    = new object[_maxItemCount];
             InitializeLockArray();
 
-            _addedHashcodesRingBuffer = new ConcurrentCircularOverwriteBuffer<int>(_maxItemCount);
-            _trimTimer = new Timer(TrimTimerCallback, this, new TimeSpan(0, 0, 0, TrimTimerInSeconds), new TimeSpan(0, 0, 0, TrimTimerInSeconds));
+            _addedHashCodesRingBuffer = new ConcurrentCircularOverwriteBuffer<int>(_maxItemCount);
+            _trimTimer = new Timer(TrimTimerCallback
+                                 , this
+                                 , new TimeSpan(0, 0, 0, TrimTimerInSeconds)
+                                 , new TimeSpan(0, 0, 0, TrimTimerInSeconds));
         }
 
         /// <summary>
@@ -78,13 +79,13 @@ namespace Ruzzie.Caching
         /// <remarks>All lookups in the cache are an O(1) operation.
         /// The maximum size of the Cache object itself is guaranteed.
         /// </remarks>
-        public FlashCacheWithBuckets(int maxItemCount) : this(EqualityComparer<TKey>.Default,maxItemCount)
+        public FlashCacheWithBuckets(int maxItemCount) : this(EqualityComparer<TKey>.Default, maxItemCount)
         {
         }
 
         private void InitializeLockArray()
         {
-#if !PORTABLE 
+#if !PORTABLE
             Parallel.For(0, _maxItemCount, i => _locks[i] = new object());
 #else
             for (int i = 0; i < _maxItemCount; i++)
@@ -94,7 +95,7 @@ namespace Ruzzie.Caching
 #endif
         }
 
-        private bool _disposed;
+        private          bool   _disposed;
         private readonly Random _random = new SimpleRandom(Environment.TickCount);
 
         /// <summary>
@@ -137,7 +138,7 @@ namespace Ruzzie.Caching
             Dispose(false);
         }
 
-      
+
         /// <summary>
         ///     The actual size of the FlashCache internal array.
         /// </summary>
@@ -166,16 +167,16 @@ namespace Ruzzie.Caching
                 throw new ArgumentNullException(nameof(valueFactory));
             }
 
-            int hashCode;
-            int index;
+            int        hashCode;
+            int        index;
             FlashEntry entry;
 
             if (TryGetInternal(key, out entry, out hashCode, out index))
-            {         
+            {
                 return entry.Value;
             }
 
-            FlashEntry nextEntry;            
+            FlashEntry nextEntry;
 
             lock (_locks[index])
             {
@@ -200,10 +201,10 @@ namespace Ruzzie.Caching
 
                 TValue value = valueFactory.Invoke(key);
 
-                InsertEntry(key, hashCode, value, index,  nextEntry,  entry);
+                InsertEntry(key, hashCode, value, index, nextEntry, entry);
                 return value;
-            }           
-        } 
+            }
+        }
 
         //TODO: add warning
         /// <summary>
@@ -217,7 +218,7 @@ namespace Ruzzie.Caching
         // ReSharper disable once RedundantAssignment
         private FlashEntry GetFlashEntryUnsafe(in int index)
         {
-            return _entries[index] ?? FlashEntry.Empty;            
+            return _entries[index] ?? FlashEntry.Empty;
         }
 
         private bool KeyIsEqual(in TKey key, in int hashCode, in FlashEntry entryToCompareTo)
@@ -232,18 +233,23 @@ namespace Ruzzie.Caching
 
         private int GetHashcodeForKey(in TKey key)
         {
-            return _comparer.GetHashCode(key);
+            return key == null ? 0 : _comparer.GetHashCode(key);
         }
 
         //Assume access to parent entry is ThreadSafe. The caller of this method is responsible for locking.
-        private void InsertEntry(in TKey key, in int hashCode, in TValue value, in int targetEntryIndex, FlashEntry entryToAddTo, FlashEntry entry)
+        private void InsertEntry(in TKey    key
+                               , in int     hashCode
+                               , in TValue  value
+                               , in int     targetEntryIndex
+                               , FlashEntry entryToAddTo
+                               , FlashEntry entry)
         {
             FlashEntry entryToInsert = new FlashEntry(hashCode, key, value);
-            _addedHashcodesRingBuffer.WriteNext(hashCode);
+            _addedHashCodesRingBuffer.WriteNext(hashCode);
 
             //No existing 'Bucket' add new entry
             if (entry == FlashEntry.Empty)
-            {               
+            {
                 _entries[targetEntryIndex] = entryToInsert;
                 if (_currentItemCount < _maxItemCount)
                 {
@@ -254,6 +260,7 @@ namespace Ruzzie.Caching
                     //remove some stuff??
                     //TrimCache(1);                    
                 }
+
                 return;
             }
 
@@ -285,7 +292,7 @@ namespace Ruzzie.Caching
             }
         }
 
-        private void TrimTimerCallback(object state)
+        private void TrimTimerCallback(object? state)
         {
             try
             {
@@ -304,12 +311,12 @@ namespace Ruzzie.Caching
             {
                 return 0;
             }
-            
+
             int trimCount = 0;
             while (trimCount < trimSize)
             {
                 int hashCode;
-                if (!_addedHashcodesRingBuffer.ReadNext(out hashCode))
+                if (!_addedHashCodesRingBuffer.ReadNext(out hashCode))
                 {
                     if (options == TrimOptions.Aggressive)
                     {
@@ -318,7 +325,7 @@ namespace Ruzzie.Caching
                     }
                     else
                     {
-                        break;                        
+                        break;
                     }
                 }
 
@@ -330,13 +337,13 @@ namespace Ruzzie.Caching
 
                     if (entry != FlashEntry.Empty)
                     {
-                        FlashEntry currentEntry = entry;
+                        FlashEntry currentEntry  = entry;
                         FlashEntry previousEntry = FlashEntry.Empty;
-                       
+
                         while (currentEntry.Next != FlashEntry.Empty)
                         {
                             previousEntry = currentEntry;
-                            currentEntry = currentEntry.Next;
+                            currentEntry  = currentEntry.Next;
                         }
 
                         // ReSharper disable once ConditionIsAlwaysTrueOrFalse
@@ -354,14 +361,15 @@ namespace Ruzzie.Caching
                             if (previousEntry != FlashEntry.Empty)
                             {
                                 previousEntry.Next = FlashEntry.Empty;
-                                _entries[index] = entry;
+                                _entries[index]    = entry;
                                 trimCount++;
                             }
                         }
                     }
                 }
-            }    
-            return trimCount;                 
+            }
+
+            return trimCount;
         }
 
         /// <summary>
@@ -394,6 +402,7 @@ namespace Ruzzie.Caching
                         }
                     }
                 }
+
                 return itemCount + nextCount;
             }
         }
@@ -408,7 +417,7 @@ namespace Ruzzie.Caching
         public bool TryGet(in TKey key, out TValue value)
         {
             FlashEntry entry;
-            bool result = TryGetInternal(key, out entry, out _, out _);
+            bool       result = TryGetInternal(key, out entry, out _, out _);
             if (result)
             {
                 value = entry.Value;
@@ -422,8 +431,8 @@ namespace Ruzzie.Caching
         private bool TryGetInternal(in TKey key, out FlashEntry entry, out int hashCode, out int index)
         {
             hashCode = GetHashcodeForKey(key);
-            index = GetTargetEntryIndexForHashcode(hashCode);
-   
+            index    = GetTargetEntryIndexForHashcode(hashCode);
+
             entry = GetFlashEntryWithMemoryBarrier(index);
 
             if (entry != FlashEntry.Empty)
@@ -436,15 +445,17 @@ namespace Ruzzie.Caching
                 FlashEntry nextEntry = entry;
 
                 while (nextEntry != FlashEntry.Empty)
-                {                   
+                {
                     entry = nextEntry;
                     if (KeyIsEqual(key, hashCode, nextEntry))
-                    {                       
+                    {
                         return true;
                     }
+
                     nextEntry = nextEntry.Next;
                 }
             }
+
             return false;
         }
 
@@ -465,18 +476,20 @@ namespace Ruzzie.Caching
             switch (trimOptions)
             {
                 case TrimOptions.Default:
-                    return TrimCache((int) (_maxItemCount*0.05), trimOptions);
+                    return TrimCache((int)(_maxItemCount * 0.05), trimOptions);
                 case TrimOptions.Aggressive:
                     if (realItemCount > MaxItemCount)
                     {
-                        return TrimCache(Math.Max(realItemCount - _maxItemCount, 0),trimOptions);
+                        return TrimCache(Math.Max(realItemCount - _maxItemCount, 0), trimOptions);
                     }
+
                     break;
                 case TrimOptions.Cautious:
                     return TrimCache(2, trimOptions);
                 default:
                     return 0;
             }
+
             return 0;
         }
 
@@ -488,25 +501,25 @@ namespace Ruzzie.Caching
         private class FlashEntry
         {
             public static readonly FlashEntry Empty = new FlashEntry(-1, default!, default!, null!);
-            public readonly int HashCode;
-            public readonly TKey Key;
-            public readonly TValue Value;
-            public volatile FlashEntry Next;
-            
+            public readonly        int        HashCode;
+            public readonly        TKey       Key;
+            public readonly        TValue     Value;
+            public volatile        FlashEntry Next;
+
             public FlashEntry(in int hashCode, in TKey key, in TValue value, FlashEntry next)
             {
                 HashCode = hashCode;
-                Key = key;
-                Value = value;
-                Next = next ?? Empty;
+                Key      = key;
+                Value    = value;
+                Next     = next ?? Empty;
             }
 
             public FlashEntry(in int hashCode, in TKey key, in TValue value)
             {
                 HashCode = hashCode;
-                Key = key;
-                Value = value;
-                Next = Empty;
+                Key      = key;
+                Value    = value;
+                Next     = Empty;
             }
         }
     }

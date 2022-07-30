@@ -7,7 +7,7 @@
     <NeutralLanguage>en-US</NeutralLanguage>
     <Authors>Dorus Verhoeckx</Authors>
     <Company>D Crafting</Company>
-    <TargetFramework>netstandard2.1</TargetFramework>
+    <TargetFrameworks>netstandard2.1;net6.0</TargetFrameworks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <AssemblyName>Ruzzie.Caching</AssemblyName>
     <PackageId>Ruzzie.Cache.FlashCache</PackageId>
@@ -32,8 +32,6 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <LangVersion>8.0</LangVersion>
-    <NullableContextOptions>enable</NullableContextOptions>
     <Nullable>enable</Nullable>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningsAsErrors />
@@ -41,9 +39,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Ruzzie.Common" Version="5.0.0.90" />
+    <PackageReference Include="Ruzzie.Common" Version="6.0.1.101" />
   </ItemGroup>
-  
+
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
+    <DefineConstants>$(DefineConstants);HAVE_SERIALIZABLE;HAVE_FULL_REFLECTION;HAVE_METHODINLINING;HAVE_TYPEISASSIGNABLEFROM;HAVE_FILEINFO;HAVE_ENVIRONMENT_IS64BITPROCESS</DefineConstants>
+  </PropertyGroup>
 
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.1' ">
     <DefineConstants>$(DefineConstants);HAVE_SERIALIZABLE;HAVE_FULL_REFLECTION;HAVE_METHODINLINING;HAVE_TYPEISASSIGNABLEFROM;HAVE_FILEINFO;HAVE_ENVIRONMENT_IS64BITPROCESS</DefineConstants>
