@@ -47,7 +47,8 @@ public class FlashCache<TKey, TValue> : IFixedSizeCache<TKey, TValue>
         _maxItemCount = maxItemCount.FindNearestPowerOfTwoEqualOrLessThan();
         _indexMask    = _maxItemCount - 1;
 
-        _comparer = comparer;
+        // ReSharper disable once NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract
+        _comparer = comparer ?? EqualityComparer<TKey>.Default;
         _entries  = new FlashEntry[_maxItemCount];
     }
 
@@ -65,9 +66,8 @@ public class FlashCache<TKey, TValue> : IFixedSizeCache<TKey, TValue>
     ///     operation.
     ///     The maximum size of the Cache object itself is guaranteed.
     /// </remarks>   
-    public FlashCache(int maxItemCount) : this(EqualityComparer<TKey>.Default,maxItemCount)
+    public FlashCache(int maxItemCount) : this(EqualityComparer<TKey>.Default, maxItemCount)
     {
-
     }
 
     /// <summary>
@@ -131,6 +131,7 @@ public class FlashCache<TKey, TValue> : IFixedSizeCache<TKey, TValue>
                     itemCount++;
                 }
             }
+
             return itemCount;
         }
     }
@@ -181,7 +182,10 @@ public class FlashCache<TKey, TValue> : IFixedSizeCache<TKey, TValue>
     /// </summary>
     /// <param name="trimOptions">The trim options.</param>
     /// <returns>0</returns>
-    [SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "trimOptions", Justification = "Needed for interface implementation.")]
+    [SuppressMessage("Microsoft.Usage"
+                   , "CA1801:ReviewUnusedParameters"
+                   , MessageId = "trimOptions"
+                   , Justification = "Needed for interface implementation.")]
     public int Trim(in TrimOptions trimOptions)
     {             //TODO: Extract to trimmablecache interface for flashcachewithbuckets
         return 0; //no trim necessary with this implementation.

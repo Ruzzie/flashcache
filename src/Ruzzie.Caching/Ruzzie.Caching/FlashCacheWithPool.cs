@@ -24,7 +24,9 @@ public class FlashCacheWithPool<TKey, TValue> : IFixedSizeCache<TKey, TValue>
 
     private readonly FlashEntryAlt[] _entries;
     private readonly int             _maxItemCount;
-    private readonly int             _indexMask;
+
+    private readonly int _indexMask;
+
     //private readonly ConcurrentCircularOverwriteBuffer<FlashEntryAlt> _objectBufferPool;
     private readonly ConcurrentQueue<FlashEntryAlt> _objectBufferPool;
 
@@ -52,8 +54,10 @@ public class FlashCacheWithPool<TKey, TValue> : IFixedSizeCache<TKey, TValue>
         _maxItemCount = maxItemCount.FindNearestPowerOfTwoEqualOrLessThan();
         _indexMask    = _maxItemCount - 1;
 
-        _comparer = comparer;
-        _entries  = new FlashEntryAlt[_maxItemCount];
+        // ReSharper disable once NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract
+        _comparer = comparer ?? EqualityComparer<TKey>.Default;
+
+        _entries = new FlashEntryAlt[_maxItemCount];
 
         for (int i = 0; i < _maxItemCount; i++)
         {
@@ -61,7 +65,7 @@ public class FlashCacheWithPool<TKey, TValue> : IFixedSizeCache<TKey, TValue>
         }
 
         int objectBufferPoolSize = Environment.ProcessorCount * 8;
-        _objectBufferPool = new ConcurrentQueue<FlashEntryAlt>(); //new ConcurrentCircularOverwriteBuffer<FlashEntryAlt>(objectBufferPoolSize);
+        _objectBufferPool = new ConcurrentQueue<FlashEntryAlt>();
 
         //fill the object pool buffer
         for (int i = 0; i < objectBufferPoolSize; i++)
@@ -87,7 +91,6 @@ public class FlashCacheWithPool<TKey, TValue> : IFixedSizeCache<TKey, TValue>
     /// </remarks>
     public FlashCacheWithPool(int maxItemCount) : this(EqualityComparer<TKey>.Default, maxItemCount)
     {
-
     }
 
     /// <summary>
@@ -133,7 +136,7 @@ public class FlashCacheWithPool<TKey, TValue> : IFixedSizeCache<TKey, TValue>
         {
             return entryValue;
         }
-            
+
         //2. Check if there are objects available from the pool, so we don't have to allocate a new object
         //if (!_objectBufferPool.ReadNext(out var newEntry))
         if (!_objectBufferPool.TryDequeue(out var newEntry))
@@ -183,6 +186,7 @@ public class FlashCacheWithPool<TKey, TValue> : IFixedSizeCache<TKey, TValue>
                     itemCount++;
                 }
             }
+
             return itemCount;
         }
     }
@@ -232,7 +236,10 @@ public class FlashCacheWithPool<TKey, TValue> : IFixedSizeCache<TKey, TValue>
     /// </summary>
     /// <param name="trimOptions">The trim options.</param>
     /// <returns>0</returns>
-    [SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "trimOptions", Justification = "Needed for interface implementation.")]
+    [SuppressMessage("Microsoft.Usage"
+                   , "CA1801:ReviewUnusedParameters"
+                   , MessageId = "trimOptions"
+                   , Justification = "Needed for interface implementation.")]
     public int Trim(in TrimOptions trimOptions)
     {             //TODO: Extract to trimmablecache interface for flashcachewithbuckets
         return 0; //no trim necessary with this implementation.
@@ -277,14 +284,8 @@ public class FlashCacheWithPool<TKey, TValue> : IFixedSizeCache<TKey, TValue>
 
         public bool HasValue
         {
-            get
-            {
-                return Interlocked.Read(ref _hasValueFlag) == 1;
-            }
-            private set
-            {
-                Interlocked.Exchange(ref _hasValueFlag, value ? 1 : 0);
-            }
+            get { return Interlocked.Read(ref _hasValueFlag) == 1; }
+            private set { Interlocked.Exchange(ref _hasValueFlag, value ? 1 : 0); }
         }
 
         public int HashCode

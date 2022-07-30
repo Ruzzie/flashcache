@@ -57,6 +57,7 @@ namespace Ruzzie.Caching
 
             _indexMask = _maxItemCount - 1;
 
+            // ReSharper disable once NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract
             _comparer = comparer ?? EqualityComparer<TKey>.Default;
             _entries  = new FlashEntry[_maxItemCount];
             _locks    = new object[_maxItemCount];
