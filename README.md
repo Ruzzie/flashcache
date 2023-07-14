@@ -1,3 +1,5 @@
+# Deprecated use [Ruzzie.Common](https://github.com/Ruzzie/Ruzzie.Common)
+
 # FlashCache
 a fixed size high performant in memory cache
 
