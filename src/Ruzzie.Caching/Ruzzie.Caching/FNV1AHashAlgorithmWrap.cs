@@ -1,10 +1,12 @@
-﻿using Ruzzie.Common.Hashing;
+﻿using System;
+using Ruzzie.Common.Hashing;
 
 namespace Ruzzie.Caching;
 
 /// <summary>
 /// An implementation of the FNV-1a hash. http://www.isthe.com/chongo/tech/comp/fnv/
 /// </summary>
+[Obsolete("This type will be removed")]
 public class FNV1AHashAlgorithmWrap : IFlashCacheHashAlgorithm
 {
     private static readonly FNV1AHashAlgorithm   FNV1AHashAlgorithm   = new FNV1AHashAlgorithm();

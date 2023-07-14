@@ -6,6 +6,7 @@ namespace Ruzzie.Caching;
 /// <summary>
 /// Equality comparer for strings that uses <see cref="StringComparer.OrdinalIgnoreCase"/> for equality and <see cref="FNV1AHashAlgorithmWrap"/> for case insensitive string generating hashcodes.
 /// </summary>
+[Obsolete("This type will moved to the Ruzzie.Common package.")]
 public class StringComparerOrdinalIgnoreCaseFNV1AHash : IEqualityComparer<string>
 {
     private static readonly StringComparer           OrdinalIgnoreCaseComparer = StringComparer.OrdinalIgnoreCase;

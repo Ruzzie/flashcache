@@ -5,6 +5,7 @@ namespace Ruzzie.Caching;
 /// <summary>
 /// Interface for custom hash algoritms. These are not cryptographic hashes but for hashspreading alternative purposes.
 /// </summary>
+[Obsolete("This type will be removed")]
 public interface IFlashCacheHashAlgorithm
 {
     /// <summary>

@@ -7,6 +7,7 @@ namespace Ruzzie.Caching;
 /// </summary>
 /// <typeparam name="TKey">The cache key.</typeparam>
 /// <typeparam name="TValue">The value to cache</typeparam>
+[Obsolete("This type will moved to the Ruzzie.Common package.")]
 public interface IFixedSizeCache<TKey,TValue>
 {
     /// <summary>

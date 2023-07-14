@@ -15,6 +15,7 @@ namespace Ruzzie.Caching;
 /// </summary>
 /// <typeparam name="TKey">The cache key</typeparam>
 /// <typeparam name="TValue">The value to cache.</typeparam>
+[Obsolete("This package will be removed. FlashCache wil be moved to Ruzzie.Common")]
 public class FlashCache<TKey, TValue> : IFixedSizeCache<TKey, TValue>
 {
     private readonly IEqualityComparer<TKey> _comparer;
